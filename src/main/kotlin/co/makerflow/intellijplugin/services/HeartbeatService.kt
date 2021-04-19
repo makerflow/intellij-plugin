@@ -44,7 +44,7 @@ class HeartbeatService {
                         .notify(ProjectManager.getInstance().defaultProject)
                 } else if (apiToken.isNotEmpty()) {
                     val httpAsync =
-                        "https://makerflow.ngrok.io/api/productive-activity?api_token=$apiToken"
+                        "https://app.makerflow.co/api/productive-activity?api_token=$apiToken"
                             .httpPost()
                             .jsonBody(nodes.toString())
                             .responseString { _, _, result ->

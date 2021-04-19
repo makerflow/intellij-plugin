@@ -5,8 +5,7 @@ import com.intellij.openapi.components.ServiceManager
 import com.intellij.openapi.editor.event.DocumentEvent
 import com.intellij.openapi.editor.event.DocumentListener
 
-
-class MyDocumentListener: DocumentListener {
+class MyDocumentListener : DocumentListener {
 
     override fun documentChanged(event: DocumentEvent) {
         super.documentChanged(event)

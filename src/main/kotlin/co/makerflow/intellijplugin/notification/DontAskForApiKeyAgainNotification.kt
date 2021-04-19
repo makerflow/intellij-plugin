@@ -4,7 +4,6 @@ import co.makerflow.intellijplugin.settings.SettingsState
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationAction
 import com.intellij.openapi.actionSystem.AnActionEvent
-import com.intellij.openapi.options.ShowSettingsUtil
 
 class DontAskForApiKeyAgainNotification : NotificationAction("Don't ask again") {
 

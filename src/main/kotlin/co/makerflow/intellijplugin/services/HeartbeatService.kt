@@ -11,10 +11,8 @@ import com.github.kittinunf.result.Result
 import com.intellij.notification.NotificationDisplayType
 import com.intellij.notification.NotificationGroup
 import com.intellij.notification.NotificationType
-import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.ProjectManager
 import kotlin.concurrent.fixedRateTimer
-
 
 class HeartbeatService {
 
@@ -27,7 +25,7 @@ class HeartbeatService {
     }
 
     init {
-        fixedRateTimer("heartbeatProcessor", false, 30000, 30000) {
+        fixedRateTimer("heartbeatProcessor", false, INTERVAL, INTERVAL) {
             if (activityTimestamps.size > 0) {
                 val list = activityTimestamps.toMutableList()
                 activityTimestamps.clear()
@@ -36,18 +34,17 @@ class HeartbeatService {
                 val nodes: ArrayNode = mapper.createArrayNode()
                 nodes.add(list.first())
                 nodes.add(list.last())
-                if (SettingsState.instance.apiToken.isEmpty() && !SettingsState.instance.dontShowApiTokenPrompt) {
-                    println("showing notification")
+                val apiToken = SettingsState.instance.apiToken
+                if (apiToken.isEmpty() && !SettingsState.instance.dontShowApiTokenPrompt) {
                     notificationGroup
                         .createNotification("Please set the Makerflow API key", NotificationType.WARNING)
                         .setTitle("Makerflow API key missing")
                         .addAction(SetApiKeyNotification())
                         .addAction(DontAskForApiKeyAgainNotification())
                         .notify(ProjectManager.getInstance().defaultProject)
-                } else if (SettingsState.instance.apiToken.isNotEmpty()) {
-                    println("firing request")
+                } else if (apiToken.isNotEmpty()) {
                     val httpAsync =
-                        "https://makerflow.ngrok.io/api/productive-activity?api_token=${SettingsState.instance.apiToken}"
+                        "https://makerflow.ngrok.io/api/productive-activity?api_token=$apiToken"
                             .httpPost()
                             .jsonBody(nodes.toString())
                             .responseString { _, _, result ->
@@ -65,4 +62,7 @@ class HeartbeatService {
         }
     }
 
+    companion object {
+        private const val INTERVAL = 30000L
+    }
 }

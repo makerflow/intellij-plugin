@@ -2,8 +2,8 @@ package co.makerflow.intellijplugin.listeners
 
 import co.makerflow.intellijplugin.services.HeartbeatService
 import com.intellij.openapi.components.ServiceManager
-import com.intellij.openapi.editor.event.*
-
+import com.intellij.openapi.editor.event.EditorMouseEvent
+import com.intellij.openapi.editor.event.EditorMouseListener
 
 internal class MyEditorMouseListener : EditorMouseListener {
 

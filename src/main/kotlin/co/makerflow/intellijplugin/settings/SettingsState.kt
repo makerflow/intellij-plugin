@@ -8,7 +8,6 @@ import com.intellij.openapi.components.State
 import com.intellij.openapi.components.Storage
 import com.intellij.util.xmlb.XmlSerializerUtil
 
-
 @State(name = "co.makerflow.intellijplugin.settings.SettingsState", storages = [Storage("MakerflowSettings.xml")])
 class SettingsState : PersistentStateComponent<SettingsState?> {
     var apiToken: String
@@ -37,4 +36,3 @@ class SettingsState : PersistentStateComponent<SettingsState?> {
             get() = ServiceManager.getService(SettingsState::class.java)
     }
 }
-

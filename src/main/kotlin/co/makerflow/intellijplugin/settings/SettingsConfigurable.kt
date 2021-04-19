@@ -4,7 +4,6 @@ import com.intellij.openapi.options.Configurable
 import org.jetbrains.annotations.Nls
 import javax.swing.JComponent
 
-
 /**
  * Provides controller functionality for application settings.
  */
@@ -20,7 +19,7 @@ class SettingsConfigurable : Configurable {
     }
 
     override fun createComponent(): JComponent {
-        mySettingsComponent = SettingsComponent()
+        mySettingsComponent = co.makerflow.intellijplugin.settings.SettingsComponent()
         return mySettingsComponent!!.panel
     }
 

@@ -1,4 +1,4 @@
-package com.github.bcosynot.intellijplugin
+package co.makerflow.intellijplugin
 
 import com.intellij.AbstractBundle
 import org.jetbrains.annotations.NonNls

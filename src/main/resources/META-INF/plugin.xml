@@ -1,19 +1,25 @@
 <idea-plugin>
-    <id>com.github.bcosynot.intellijplugin</id>
-    <name>intellij-plugin</name>
-    <vendor>bcosynot</vendor>
+    <id>co.makerflow.intellijplugin</id>
+    <name>Makerflow</name>
+    <vendor>Makerflow</vendor>
 
     <!-- Product and plugin compatibility requirements -->
     <!-- https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->
     <depends>com.intellij.modules.platform</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <applicationService serviceImplementation="com.github.bcosynot.intellijplugin.services.MyApplicationService"/>
-        <projectService serviceImplementation="com.github.bcosynot.intellijplugin.services.MyProjectService"/>
+        <applicationConfigurable parentId="tools" instance="co.makerflow.intellijplugin.settings.SettingsConfigurable"
+                                 id="co.makerflow.intellijplugin.settings.SettingsConfigurable"
+                                 displayName="Makerflow"/>
+        <applicationService serviceImplementation="co.makerflow.intellijplugin.services.HeartbeatService"/>
+        <editorFactoryDocumentListener
+                implementation="co.makerflow.intellijplugin.listeners.MyDocumentListener"/>
+        <editorFactoryMouseListener
+                implementation="co.makerflow.intellijplugin.listeners.MyEditorMouseListener"/>
+        <editorFactoryMouseMotionListener
+                implementation="co.makerflow.intellijplugin.listeners.MyEditorMouseMotionListener"/>
+        <applicationService serviceImplementation="co.makerflow.intellijplugin.settings.SettingsState"/>
+        <applicationService serviceImplementation="co.makerflow.intellijplugin.settings.CredentialAttributesProvider"/>
     </extensions>
 
-    <applicationListeners>
-        <listener class="com.github.bcosynot.intellijplugin.listeners.MyProjectManagerListener"
-                  topic="com.intellij.openapi.project.ProjectManagerListener"/>
-    </applicationListeners>
 </idea-plugin>

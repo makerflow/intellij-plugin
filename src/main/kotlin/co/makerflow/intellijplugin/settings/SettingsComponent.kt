@@ -19,11 +19,13 @@ class SettingsComponent {
         set(newText) {
             apiToken.text = newText
         }
+    private val comment =
+        "<a target=\"_blank\" href=\"https://app.makerflow.co/settings#/api\">Click here</a> to get your API token."
 
     init {
         val component = UI.PanelFactory.panel(apiToken)
             .withLabel("Enter API token:")
-            .withComment("<a target=\"_blank\" href=\"https://app.makerflow.co/settings#/api\">Click here</a> to get your API token.")
+            .withComment(comment)
             .createPanel()
         panel = FormBuilder.createFormBuilder()
             .addComponent(component, 1)

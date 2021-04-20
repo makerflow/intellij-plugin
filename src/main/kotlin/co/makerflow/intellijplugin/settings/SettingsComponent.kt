@@ -1,8 +1,8 @@
 package co.makerflow.intellijplugin.settings
 
-import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBPasswordField
 import com.intellij.util.ui.FormBuilder
+import com.intellij.util.ui.UI
 import javax.swing.JComponent
 import javax.swing.JPanel
 
@@ -15,14 +15,18 @@ class SettingsComponent {
     val preferredFocusedComponent: JComponent
         get() = apiToken
     var apiTokenText: String
-        get() = apiToken.text
+        get() = apiToken.password.joinToString("")
         set(newText) {
             apiToken.text = newText
         }
 
     init {
+        val component = UI.PanelFactory.panel(apiToken)
+            .withLabel("Enter API token:")
+            .withComment("<a target=\"_blank\" href=\"https://app.makerflow.co/settings#/api\">Click here</a> to get your API token.")
+            .createPanel()
         panel = FormBuilder.createFormBuilder()
-            .addLabeledComponent(JBLabel("Enter API Token: "), apiToken, 1, false)
+            .addComponent(component, 1)
             .addComponentFillVertically(JPanel(), 0)
             .panel
     }

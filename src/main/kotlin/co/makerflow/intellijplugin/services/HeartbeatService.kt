@@ -37,8 +37,8 @@ class HeartbeatService {
                 val apiToken = SettingsState.instance.apiToken
                 if (apiToken.isEmpty() && !SettingsState.instance.dontShowApiTokenPrompt) {
                     notificationGroup
-                        .createNotification("Please set the Makerflow API key", NotificationType.WARNING)
-                        .setTitle("Makerflow API key missing")
+                        .createNotification("Please set the Makerflow API token", NotificationType.WARNING)
+                        .setTitle("Makerflow API token missing")
                         .addAction(SetApiKeyNotification())
                         .addAction(DontAskForApiKeyAgainNotification())
                         .notify(ProjectManager.getInstance().defaultProject)

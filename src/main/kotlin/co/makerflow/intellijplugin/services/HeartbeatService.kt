@@ -38,8 +38,10 @@ class HeartbeatService {
                 val apiToken = SettingsState.instance.apiToken
                 if (apiToken.isEmpty() && !SettingsState.instance.dontShowApiTokenPrompt) {
                     notificationGroup
-                        .createNotification(MyBundle.getMessage("makerflow-apikey.notification.body"),
-                            NotificationType.WARNING)
+                        .createNotification(
+                            MyBundle.getMessage("makerflow-apikey.notification.body"),
+                            NotificationType.WARNING
+                        )
                         .setTitle(MyBundle.getMessage("makerflow-apikey.notification.title"))
                         .addAction(SetApiKeyNotification())
                         .addAction(DontAskForApiKeyAgainNotification())

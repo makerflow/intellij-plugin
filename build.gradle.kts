@@ -55,7 +55,7 @@ changelog {
 
 // Configure detekt plugin.
 // Read more: https://detekt.github.io/detekt/kotlindsl.html
-//detekt {
+// detekt {
 //    config = files("./detekt-config.yml")
 //    buildUponDefaultConfig = true
 //
@@ -64,7 +64,7 @@ changelog {
 //        xml.enabled = false
 //        txt.enabled = false
 //    }
-//}
+// }
 
 tasks {
     // Set the compatibility versions to 1.8

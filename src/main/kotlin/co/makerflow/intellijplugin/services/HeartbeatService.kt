@@ -1,5 +1,6 @@
 package co.makerflow.intellijplugin.services
 
+import co.makerflow.intellijplugin.MyBundle
 import co.makerflow.intellijplugin.notification.DontAskForApiKeyAgainNotification
 import co.makerflow.intellijplugin.notification.SetApiKeyNotification
 import co.makerflow.intellijplugin.settings.SettingsState
@@ -37,8 +38,8 @@ class HeartbeatService {
                 val apiToken = SettingsState.instance.apiToken
                 if (apiToken.isEmpty() && !SettingsState.instance.dontShowApiTokenPrompt) {
                     notificationGroup
-                        .createNotification("Please set the Makerflow API token", NotificationType.WARNING)
-                        .setTitle("Makerflow API token missing")
+                        .createNotification(MyBundle.getMessage("makerflow-apikey.notification.body"), NotificationType.WARNING)
+                        .setTitle(MyBundle.getMessage("makerflow-apikey.notification.title"))
                         .addAction(SetApiKeyNotification())
                         .addAction(DontAskForApiKeyAgainNotification())
                         .notify(ProjectManager.getInstance().defaultProject)
@@ -52,7 +53,10 @@ class HeartbeatService {
                                     is Result.Failure -> {
                                         activityTimestamps.addAll(list)
                                     }
-                                    is Result.Success -> TODO()
+                                    is Result.Success -> {
+//                                        println("request posted successfully")
+                                        // TODO: gotta figure out what to do here
+                                    }
                                 }
                             }
 

@@ -23,6 +23,7 @@ class SettingsState : PersistentStateComponent<SettingsState?> {
             PasswordSafe.instance.set(credentialAttributes, credentials)
         }
     var dontShowApiTokenPrompt = false
+    var dontShowFlowModeStartedNotification = false
     override fun getState(): SettingsState {
         return this
     }

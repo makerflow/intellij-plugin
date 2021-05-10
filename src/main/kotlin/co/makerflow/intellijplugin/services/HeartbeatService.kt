@@ -25,6 +25,7 @@ class HeartbeatService {
     private val activityTimestamps = arrayListOf<Long>()
     private val notificationGroup =
         NotificationGroup("Makerflow notifications", NotificationDisplayType.BALLOON, true)
+
     private fun flowModeStartedNotification() = notificationGroup
         .createNotification(
             "Flow Mode started",
@@ -32,6 +33,7 @@ class HeartbeatService {
             NotificationType.INFORMATION
         )
         .addAction(DontShowFlowModeStartedNotificationAgain())
+
     private fun promptForApiTokenNotification() = notificationGroup
         .createNotification(
             MyBundle.getMessage("makerflow-apikey.notification.body"),
@@ -45,7 +47,11 @@ class HeartbeatService {
         activityTimestamps.add(System.currentTimeMillis())
     }
 
-    data class ProductiveActivityResponse(var success: Boolean, var flowModeAlreadyOngoing: Boolean)
+    data class ProductiveActivityResponse(
+        var success: Boolean,
+        var flowModeAlreadyOngoing: Boolean,
+        var flow: Any?
+    )
 
     init {
         fixedRateTimer("heartbeatProcessor", false, INTERVAL, INTERVAL) {
@@ -70,7 +76,6 @@ class HeartbeatService {
                                 value: ProductiveActivityResponse
                             ) {
                                 if (showFlowModeStartedNotification(value)) {
-                                    println("showing notification")
                                     ProjectManager.getInstance().openProjects.forEach {
                                         flowModeStartedNotification().notify(it)
                                     }
@@ -87,7 +92,8 @@ class HeartbeatService {
     }
 
     private fun showFlowModeStartedNotification(value: ProductiveActivityResponse) =
-        !SettingsState.instance.dontShowFlowModeStartedNotification && value.success && value.flowModeAlreadyOngoing
+        !SettingsState.instance.dontShowFlowModeStartedNotification && value.success && !value.flowModeAlreadyOngoing &&
+            value.flow != null
 
     companion object {
         private const val INTERVAL = 30000L

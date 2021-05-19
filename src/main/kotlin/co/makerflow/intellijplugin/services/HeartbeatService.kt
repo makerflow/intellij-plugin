@@ -4,6 +4,7 @@ import co.makerflow.intellijplugin.MyBundle
 import co.makerflow.intellijplugin.notification.DontAskForApiKeyAgainNotification
 import co.makerflow.intellijplugin.notification.DontShowFlowModeStartedNotificationAgain
 import co.makerflow.intellijplugin.notification.SetApiKeyNotification
+import co.makerflow.intellijplugin.notification.StopFlowModeNotificationAction
 import co.makerflow.intellijplugin.settings.SettingsState
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.ArrayNode
@@ -24,7 +25,7 @@ class HeartbeatService {
 
     private val activityTimestamps = arrayListOf<Long>()
     private val notificationGroup =
-        NotificationGroup("Makerflow notifications", NotificationDisplayType.BALLOON, true)
+        NotificationGroup.balloonGroup("Makerflow")
 
     private fun flowModeStartedNotification() = notificationGroup
         .createNotification(
@@ -32,6 +33,7 @@ class HeartbeatService {
             "",
             NotificationType.INFORMATION
         )
+        .addAction(StopFlowModeNotificationAction())
         .addAction(DontShowFlowModeStartedNotificationAgain())
 
     private fun promptForApiTokenNotification() = notificationGroup

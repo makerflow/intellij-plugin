@@ -11,14 +11,6 @@ internal class MyEditorMouseListener : EditorMouseListener {
         heartbeat()
     }
 
-    override fun mousePressed(event: EditorMouseEvent) {
-        heartbeat()
-    }
-
-    override fun mouseReleased(event: EditorMouseEvent) {
-        heartbeat()
-    }
-
     private fun heartbeat() {
         val heartbeatService = ServiceManager.getService(HeartbeatService::class.java)
         heartbeatService.heartbeat()

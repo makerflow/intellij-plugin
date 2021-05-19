@@ -16,8 +16,6 @@
                 implementation="co.makerflow.intellijplugin.listeners.MyDocumentListener"/>
         <editorFactoryMouseListener
                 implementation="co.makerflow.intellijplugin.listeners.MyEditorMouseListener"/>
-        <editorFactoryMouseMotionListener
-                implementation="co.makerflow.intellijplugin.listeners.MyEditorMouseMotionListener"/>
         <applicationService serviceImplementation="co.makerflow.intellijplugin.settings.SettingsState"/>
         <applicationService serviceImplementation="co.makerflow.intellijplugin.settings.CredentialAttributesProvider"/>
     </extensions>

@@ -10,7 +10,7 @@ class StopFlowModeNotificationAction : NotificationAction("Stop") {
 
     override fun actionPerformed(e: AnActionEvent, notification: Notification) {
         val apiToken = SettingsState.instance.apiToken
-        Fuel.post("https://app.makerflow.co/api/flow-mode/stop?api_token==$apiToken")
+        Fuel.post("https://app.makerflow.co/api/flow-mode/stop?api_token==$apiToken").response()
         notification.expire()
     }
 }

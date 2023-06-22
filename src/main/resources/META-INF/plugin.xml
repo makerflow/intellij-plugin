@@ -2,6 +2,7 @@
     <id>co.makerflow.intellijplugin</id>
     <name>Makerflow</name>
     <vendor>Makerflow</vendor>
+    <version>0.0.1</version>
 
     <!-- Product and plugin compatibility requirements -->
     <!-- https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->
@@ -16,8 +17,23 @@
                 implementation="co.makerflow.intellijplugin.listeners.MyDocumentListener"/>
         <editorFactoryMouseListener
                 implementation="co.makerflow.intellijplugin.listeners.MyEditorMouseListener"/>
+        <fileDocumentManagerListener implementation="co.makerflow.intellijplugin.listeners.MyFileDocumentManagerListener"/>
+        <editorFactoryListener implementation="co.makerflow.intellijplugin.listeners.MyEditorFactoryListener"/>
         <applicationService serviceImplementation="co.makerflow.intellijplugin.settings.SettingsState"/>
         <applicationService serviceImplementation="co.makerflow.intellijplugin.settings.CredentialAttributesProvider"/>
+        <applicationService serviceImplementation="co.makerflow.intellijplugin.state.FlowState"/>
+        <statusBarWidgetFactory implementation="co.makerflow.intellijplugin.status.FlowStatusBarWidgetFactory" />
     </extensions>
+
+    <actions>
+        <action class="co.makerflow.intellijplugin.actions.ToggleFlowModeAction" id="ToggleFlowMode">
+        </action>
+    </actions>
+
+    <applicationListeners>
+        <listener class="co.makerflow.intellijplugin.listeners.FlowModeProjectManagerListener"
+                  topic="com.intellij.openapi.project.ProjectManagerListener"/>
+    </applicationListeners>
+
 
 </idea-plugin>

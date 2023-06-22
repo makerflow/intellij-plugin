@@ -2,8 +2,8 @@ package co.makerflow.intellijplugin.settings
 
 import com.intellij.credentialStore.Credentials
 import com.intellij.ide.passwordSafe.PasswordSafe
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.PersistentStateComponent
-import com.intellij.openapi.components.ServiceManager
 import com.intellij.openapi.components.State
 import com.intellij.openapi.components.Storage
 import com.intellij.util.xmlb.XmlSerializerUtil
@@ -13,14 +13,16 @@ class SettingsState : PersistentStateComponent<SettingsState?> {
     var apiToken: String
         get() {
             val credentialAttributes =
-                ServiceManager.getService(CredentialAttributesProvider::class.java).getCredentialAttributes()
+                ApplicationManager.getApplication().getService(CredentialAttributesProvider::class.java)
+                    .getCredentialAttributes()
             return PasswordSafe.instance.getPassword(credentialAttributes).orEmpty()
         }
         set(value) {
             val credentialAttributes =
-                ServiceManager.getService(CredentialAttributesProvider::class.java).getCredentialAttributes()
+                ApplicationManager.getApplication().getService(CredentialAttributesProvider::class.java)
+                    .getCredentialAttributes()
             val credentials = Credentials("user", value)
-            PasswordSafe.instance.set(credentialAttributes, credentials)
+            PasswordSafe.instance[credentialAttributes] = credentials
         }
     var dontShowApiTokenPrompt = false
     var dontShowFlowModeStartedNotification = false
@@ -34,6 +36,6 @@ class SettingsState : PersistentStateComponent<SettingsState?> {
 
     companion object {
         val instance: SettingsState
-            get() = ServiceManager.getService(SettingsState::class.java)
+            get() = ApplicationManager.getApplication().getService(SettingsState::class.java)
     }
 }

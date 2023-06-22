@@ -1,4 +1,4 @@
-package co.makerflow.intellijplugin.notification
+package co.makerflow.intellijplugin.actions
 
 import co.makerflow.intellijplugin.settings.SettingsState
 import com.intellij.notification.Notification

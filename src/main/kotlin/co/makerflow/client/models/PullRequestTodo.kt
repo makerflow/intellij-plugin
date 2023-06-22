@@ -24,9 +24,11 @@ import com.fasterxml.jackson.annotation.JsonProperty
  * A pull request that needs to be reviewed by the user
  *
  * @param sourceType The type of source that the todo is from
- * @param type The type of todo
+ * @param type 
  * @param createdAt Timestamp for when the todo was created
  * @param done Whether the todo has been completed
+ * @param pr 
+ * @param meta 
  */
 
 
@@ -34,11 +36,10 @@ data class PullRequestTodo (
 
     /* The type of source that the todo is from */
     @field:JsonProperty("sourceType")
-    val sourceType: kotlin.String? = null,
+    val sourceType: PullRequestTodo.SourceType? = null,
 
-    /* The type of todo */
     @field:JsonProperty("type")
-    val type: kotlin.String? = null,
+    val type: PullRequestTodo.Type? = null,
 
     /* Timestamp for when the todo was created */
     @field:JsonProperty("createdAt")
@@ -46,7 +47,35 @@ data class PullRequestTodo (
 
     /* Whether the todo has been completed */
     @field:JsonProperty("done")
-    val done: kotlin.Boolean? = null
+    val done: kotlin.Boolean? = null,
 
-)
+    @field:JsonProperty("pr")
+    val pr: PullRequest? = null,
+
+    @field:JsonProperty("meta")
+    val meta: PullRequestTodoMeta? = null
+
+) {
+
+    /**
+     * The type of source that the todo is from
+     *
+     * Values: slack,github,bitbucket,makerflow
+     */
+    enum class SourceType(val value: kotlin.String) {
+        @JsonProperty(value = "slack") slack("slack"),
+        @JsonProperty(value = "github") github("github"),
+        @JsonProperty(value = "bitbucket") bitbucket("bitbucket"),
+        @JsonProperty(value = "makerflow") makerflow("makerflow");
+    }
+    /**
+     * 
+     *
+     * Values: github,bitbucket
+     */
+    enum class Type(val value: kotlin.String) {
+        @JsonProperty(value = "github") github("github"),
+        @JsonProperty(value = "bitbucket") bitbucket("bitbucket");
+    }
+}
 

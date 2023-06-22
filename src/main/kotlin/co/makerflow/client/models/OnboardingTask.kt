@@ -21,41 +21,33 @@ import com.fasterxml.jackson.annotation.JsonProperty
 /**
  * 
  *
- * @param type 
  * @param sourceType 
+ * @param type 
  * @param createdAt 
- * @param step 
  * @param done 
+ * @param step 
  */
 
 
 data class OnboardingTask (
 
-    @field:JsonProperty("type")
-    val type: OnboardingTask.Type? = null,
-
     @field:JsonProperty("sourceType")
     val sourceType: OnboardingTask.SourceType? = null,
+
+    @field:JsonProperty("type")
+    val type: OnboardingTask.Type? = null,
 
     @field:JsonProperty("createdAt")
     val createdAt: kotlin.String? = null,
 
-    @field:JsonProperty("step")
-    val step: OnboardingTask.Step? = null,
-
     @field:JsonProperty("done")
-    val done: kotlin.Boolean? = null
+    val done: kotlin.Boolean? = null,
+
+    @field:JsonProperty("step")
+    val step: OnboardingTask.Step? = null
 
 ) {
 
-    /**
-     * 
-     *
-     * Values: onboarding
-     */
-    enum class Type(val value: kotlin.String) {
-        @JsonProperty(value = "onboarding") onboarding("onboarding");
-    }
     /**
      * 
      *
@@ -63,6 +55,14 @@ data class OnboardingTask (
      */
     enum class SourceType(val value: kotlin.String) {
         @JsonProperty(value = "makerflow") makerflow("makerflow");
+    }
+    /**
+     * 
+     *
+     * Values: onboarding
+     */
+    enum class Type(val value: kotlin.String) {
+        @JsonProperty(value = "onboarding") onboarding("onboarding");
     }
     /**
      * 

@@ -16,9 +16,9 @@
 package co.makerflow.client.apis
 
 import co.makerflow.client.models.CalendarEvent
-import co.makerflow.client.models.GetTodos200ResponseInner
 import co.makerflow.client.models.MarkDone200Response
 import co.makerflow.client.models.MarkDoneRequest
+import co.makerflow.client.models.TypedTodo
 
 import co.makerflow.client.infrastructure.*
 import io.ktor.client.HttpClientConfig
@@ -38,10 +38,10 @@ import com.fasterxml.jackson.databind.ObjectMapper
         * 
         * 
          * @param source To specify source of request (optional)
-         * @return kotlin.collections.List<GetTodos200ResponseInner>
+         * @return kotlin.collections.List<TypedTodo>
         */
             @Suppress("UNCHECKED_CAST")
-        open suspend fun getTodos(source: kotlin.String?): HttpResponse<kotlin.collections.List<GetTodos200ResponseInner>> {
+        open suspend fun getTodos(source: kotlin.String?): HttpResponse<kotlin.collections.List<TypedTodo>> {
 
             val localVariableAuthNames = listOf<String>("api_token")
 

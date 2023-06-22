@@ -32,7 +32,7 @@ data class Todo (
 
     /* The type of source that the todo is from */
     @field:JsonProperty("sourceType")
-    val sourceType: kotlin.String? = null,
+    val sourceType: Todo.SourceType? = null,
 
     /* The type of todo */
     @field:JsonProperty("type")
@@ -46,5 +46,18 @@ data class Todo (
     @field:JsonProperty("done")
     val done: kotlin.Boolean? = null
 
-)
+) {
+
+    /**
+     * The type of source that the todo is from
+     *
+     * Values: slack,github,bitbucket,makerflow
+     */
+    enum class SourceType(val value: kotlin.String) {
+        @JsonProperty(value = "slack") slack("slack"),
+        @JsonProperty(value = "github") github("github"),
+        @JsonProperty(value = "bitbucket") bitbucket("bitbucket"),
+        @JsonProperty(value = "makerflow") makerflow("makerflow");
+    }
+}
 

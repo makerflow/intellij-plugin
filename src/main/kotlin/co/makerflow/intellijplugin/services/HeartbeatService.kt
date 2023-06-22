@@ -1,39 +1,36 @@
 package co.makerflow.intellijplugin.services
 
+import co.makerflow.client.apis.ProductiveActivityApi
+import co.makerflow.client.infrastructure.ApiClient
 import co.makerflow.intellijplugin.MyBundle
-import co.makerflow.intellijplugin.notification.DontAskForApiKeyAgainNotification
-import co.makerflow.intellijplugin.notification.DontShowFlowModeStartedNotificationAgain
-import co.makerflow.intellijplugin.notification.SetApiKeyNotification
-import co.makerflow.intellijplugin.notification.StopFlowModeNotificationAction
+import co.makerflow.intellijplugin.actions.DontAskForApiKeyAgainNotificationAction
+import co.makerflow.intellijplugin.actions.DontShowFlowModeStartedNotificationAgain
+import co.makerflow.intellijplugin.actions.SetApiKeyNotificationAction
+import co.makerflow.intellijplugin.actions.StopFlowModeNotificationAction
 import co.makerflow.intellijplugin.settings.SettingsState
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.node.ArrayNode
-import com.github.kittinunf.fuel.Fuel
-import com.github.kittinunf.fuel.core.FuelError
-import com.github.kittinunf.fuel.core.Request
-import com.github.kittinunf.fuel.core.Response
-import com.github.kittinunf.fuel.core.ResponseHandler
-import com.github.kittinunf.fuel.jackson.objectBody
-import com.github.kittinunf.fuel.jackson.responseObject
-import com.intellij.notification.NotificationGroup
+import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
+import com.intellij.openapi.components.Service
 import com.intellij.openapi.project.ProjectManager
-import kotlin.concurrent.fixedRateTimer
+import com.intellij.util.concurrency.AppExecutorUtil
+import com.intellij.util.ui.UIUtil
+import com.squareup.moshi.JsonEncodingException
+import io.ktor.client.HttpClient
+import io.ktor.client.call.NoTransformationFoundException
+import io.ktor.serialization.JsonConvertException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 
+@Service
 class HeartbeatService {
 
     private val activityTimestamps = arrayListOf<Long>()
     private val notificationGroup =
-        NotificationGroup.balloonGroup("Makerflow")
-
-    private fun flowModeStartedNotification() = notificationGroup
-        .createNotification(
-            "Flow Mode started",
-            "",
-            NotificationType.INFORMATION
-        )
-        .addAction(StopFlowModeNotificationAction())
-        .addAction(DontShowFlowModeStartedNotificationAgain())
+        NotificationGroupManager.getInstance().getNotificationGroup("Makerflow")
+    private val baseUrl = System.getenv("MAKERFLOW_API_URL") ?: ApiClient.BASE_URL
+    private val httpClient = HttpClient()
 
     private fun promptForApiTokenNotification() = notificationGroup
         .createNotification(
@@ -41,60 +38,70 @@ class HeartbeatService {
             NotificationType.WARNING
         )
         .setTitle(MyBundle.getMessage("makerflow-apikey.notification.title"))
-        .addAction(SetApiKeyNotification())
-        .addAction(DontAskForApiKeyAgainNotification())
+        .addAction(SetApiKeyNotificationAction())
+        .addAction(DontAskForApiKeyAgainNotificationAction())
 
     fun heartbeat() {
         activityTimestamps.add(System.currentTimeMillis())
     }
 
-    data class ProductiveActivityResponse(
-        var success: Boolean,
-        var flowModeAlreadyOngoing: Boolean,
-        var flow: Any?
-    )
+    // A new Job to fetch the ongoing flow mode
+    private val sendHeartbeatsCoroutineScope = CoroutineScope(Dispatchers.IO)
 
     init {
-        fixedRateTimer("heartbeatProcessor", false, INTERVAL, INTERVAL) {
-            if (activityTimestamps.size > 0) {
-                val list = activityTimestamps.toMutableList()
-                activityTimestamps.clear()
-                list.sort()
-                val mapper = ObjectMapper()
-                val nodes: ArrayNode = mapper.createArrayNode()
-                nodes.add(list.first())
-                nodes.add(list.last())
-                val apiToken = SettingsState.instance.apiToken
+        AppExecutorUtil.getAppScheduledExecutorService().scheduleWithFixedDelay({
+            if (activityTimestamps.size >= 2) {
+
+                val apiToken = System.getenv("MAKERFLOW_API_TOKEN") ?: SettingsState.instance.apiToken
                 if (apiToken.isEmpty() && !SettingsState.instance.dontShowApiTokenPrompt) {
                     ProjectManager.getInstance().openProjects.forEach { promptForApiTokenNotification().notify(it) }
                 } else if (apiToken.isNotEmpty()) {
-                    Fuel.post("https://app.makerflow.co/api/productive-activity?api_token=$apiToken")
-                        .objectBody(nodes)
-                        .responseObject(object : ResponseHandler<ProductiveActivityResponse> {
-                            override fun success(
-                                request: Request,
-                                response: Response,
-                                value: ProductiveActivityResponse
-                            ) {
-                                if (showFlowModeStartedNotification(value)) {
-                                    ProjectManager.getInstance().openProjects.forEach {
-                                        flowModeStartedNotification().notify(it)
-                                    }
-                                }
-                            }
-
-                            override fun failure(request: Request, response: Response, error: FuelError) {
-                                activityTimestamps.addAll(list)
-                            }
-                        })
+                    UIUtil.invokeLaterIfNeeded {
+                        sendHeartbeatsCoroutineScope.launch {
+                            send(apiToken)
+                        }
+                    }
                 }
             }
-        }
+        }, INTERVAL, INTERVAL, java.util.concurrent.TimeUnit.MILLISECONDS)
     }
 
-    private fun showFlowModeStartedNotification(value: ProductiveActivityResponse) =
-        !SettingsState.instance.dontShowFlowModeStartedNotification && value.success && !value.flowModeAlreadyOngoing &&
-            value.flow != null
+    private suspend fun send(
+        apiToken: String
+    ) {
+        val list = activityTimestamps.toMutableList()
+        activityTimestamps.clear()
+        list.sort()
+        val api = ProductiveActivityApi(baseUrl, httpClient.engine, null, ApiClient.JSON_DEFAULT)
+        api.setApiKey(apiToken)
+        return coroutineScope {
+            @Suppress("TooGenericExceptionCaught")
+            launch {
+                try {
+                    val logProductiveActivity =
+                        api.logProductiveActivity(list, "jetbrains")
+                    if (logProductiveActivity.success) {
+                        activityTimestamps.clear()
+                    } else {
+                        activityTimestamps.addAll(list)
+                    }
+                } catch (e: Exception) {
+                    when(e) {
+                        is JsonConvertException,
+                        is NoTransformationFoundException,
+                        is JsonEncodingException -> {
+                            /*
+                           Intentionally left blank
+                           thisLogger().error(e)
+                           thisLogger().error("Error converting ongoing flow mode: ${e.message}")
+                           */
+                        }
+                        else -> throw e
+                    }
+                }
+            }
+        }.join()
+    }
 
     companion object {
         private const val INTERVAL = 30000L

@@ -27,69 +27,52 @@ import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 
 /**
- * 
  *
- * @param task 
+ *
+ * @param task
  * @param sourceType The type of source that the todo is from
  * @param type The type of todo
  * @param createdAt Timestamp for when the todo was created
  * @param done Whether the todo has been completed
- * @param step 
- * @param pr 
- * @param meta 
+ * @param step
+ * @param pr
+ * @param meta
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type", visible = true)
 @JsonSubTypes(
+    JsonSubTypes.Type(value = PullRequestTodo::class, name = "bitbucket"),
+    JsonSubTypes.Type(value = PullRequestTodo::class, name = "github"),
     JsonSubTypes.Type(value = CustomTaskTodo::class, name = "makerflow"),
-    JsonSubTypes.Type(value = OnboardingTask::class, name = "onboarding"),
-    JsonSubTypes.Type(value = PullRequestTodo::class, name = "pullrequest")
+    JsonSubTypes.Type(value = OnboardingTask::class, name = "onboarding")
 )
 
-interface TypedTodo {
+open class TypedTodo() {
 
-    @get:JsonProperty("task")
-    val task: CustomTask
     /* The type of source that the todo is from */
     @get:JsonProperty("sourceType")
-    val sourceType: TypedTodo.SourceType?
+    val sourceType: TypedTodo.SourceType? = null
     /* The type of todo */
     @get:JsonProperty("type")
-    val type: kotlin.String?
+    val type: kotlin.String? = null
     /* Timestamp for when the todo was created */
     @get:JsonProperty("createdAt")
-    val createdAt: kotlin.String?
+    val createdAt: kotlin.String? = null
     /* Whether the todo has been completed */
     @get:JsonProperty("done")
-    val done: kotlin.Boolean?
-    @get:JsonProperty("step")
-    val step: TypedTodo.Step?
-    @get:JsonProperty("pr")
-    val pr: PullRequest?
-    @get:JsonProperty("meta")
-    val meta: PullRequestTodoMeta?
+    val done: kotlin.Boolean? = null
+
     /**
      * The type of source that the todo is from
      *
      * Values: slack,github,bitbucket,makerflow
      */
+    @Suppress("EnumNaming")
     enum class SourceType(val value: kotlin.String) {
         @JsonProperty(value = "slack") slack("slack"),
         @JsonProperty(value = "github") github("github"),
         @JsonProperty(value = "bitbucket") bitbucket("bitbucket"),
         @JsonProperty(value = "makerflow") makerflow("makerflow");
     }
-    /**
-     * 
-     *
-     * Values: chatMinusIntegration,repoMinusIntegration,calendarMinusIntegration,cliMinusDownload,editorMinusIntegration,browserMinusExtension
-     */
-    enum class Step(val value: kotlin.String) {
-        @JsonProperty(value = "chat-integration") chatMinusIntegration("chat-integration"),
-        @JsonProperty(value = "repo-integration") repoMinusIntegration("repo-integration"),
-        @JsonProperty(value = "calendar-integration") calendarMinusIntegration("calendar-integration"),
-        @JsonProperty(value = "cli-download") cliMinusDownload("cli-download"),
-        @JsonProperty(value = "editor-integration") editorMinusIntegration("editor-integration"),
-        @JsonProperty(value = "browser-extension") browserMinusExtension("browser-extension");
-    }
+
 }
 

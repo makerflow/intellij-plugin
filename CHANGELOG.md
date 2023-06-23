@@ -7,9 +7,19 @@ This plugin requires an existing Makerflow account and an <a href="https://app.m
 Use it along with the Makerflow browser extension to automatically block distracting websites, and the webapp to keep 
 track of all your notifications.
 
-## [Unreleased]
+## Unreleased
 
 ### Added
+
+- Initial release!
+- Added a status bar widget and action to toggle Flow Mode
+  - Block distracting websites with the Makerflow browser extension
+  - Turn on Do-Not-Disturb mode on macOS
+  - Update your status on Slack to let your team know you're in Flow Mode
+  - Start a timer to track your flow time
+  - Close distracting apps with the Makerflow desktop app
+- Added a tool window to see items in Unified Task List
+  - See all your notifications from GitHub/Bitbucket in your IDE
 
 ### Changed
 

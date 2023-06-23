@@ -92,7 +92,7 @@ track of all your notifications.
     )
     itemPrefix.set("-")
     keepUnreleasedSection.set(true)
-    unreleasedTerm.set("[Unreleased]")
+    unreleasedTerm.set("Unreleased")
     groups.set(listOf("Added", "Changed", "Deprecated", "Removed", "Fixed", "Security"))
     lineSeparator.set("\n")
     combinePreReleases.set(true)

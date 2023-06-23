@@ -15,7 +15,7 @@
 
 package co.makerflow.client.models
 
-import co.makerflow.client.models.FlowModeTodo
+import co.makerflow.client.models.TypedTodo
 
 import com.fasterxml.jackson.annotation.JsonProperty
 
@@ -70,7 +70,7 @@ data class FlowMode (
     val taskType: kotlin.String? = null,
 
     @field:JsonProperty("todo")
-    val todo: FlowModeTodo? = null,
+    val todo: TypedTodo? = null,
 
     /* The source of the request that started flow mode */
     @field:JsonProperty("start_source")

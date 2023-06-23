@@ -15,49 +15,64 @@
 
 package co.makerflow.client.models
 
+import co.makerflow.client.models.CustomTask
+import co.makerflow.client.models.CustomTaskTodo
+import co.makerflow.client.models.OnboardingTask
+import co.makerflow.client.models.PullRequest
+import co.makerflow.client.models.PullRequestTodo
+import co.makerflow.client.models.PullRequestTodoMeta
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.annotation.JsonSubTypes
+import com.fasterxml.jackson.annotation.JsonTypeInfo
 
 /**
- * A todo task
  *
+ *
+ * @param task
  * @param sourceType The type of source that the todo is from
  * @param type The type of todo
  * @param createdAt Timestamp for when the todo was created
  * @param done Whether the todo has been completed
+ * @param step
+ * @param pr
+ * @param meta
  */
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type", visible = true)
+@JsonSubTypes(
+    JsonSubTypes.Type(value = PullRequestTodo::class, name = "bitbucket"),
+    JsonSubTypes.Type(value = PullRequestTodo::class, name = "github"),
+    JsonSubTypes.Type(value = CustomTaskTodo::class, name = "makerflow"),
+    JsonSubTypes.Type(value = OnboardingTask::class, name = "onboarding")
+)
 
-
-data class Todo (
+open class TypedTodo() {
 
     /* The type of source that the todo is from */
-    @field:JsonProperty("sourceType")
-    val sourceType: Todo.SourceType? = null,
-
+    @get:JsonProperty("sourceType")
+    val sourceType: TypedTodo.SourceType? = null
     /* The type of todo */
-    @field:JsonProperty("type")
-    val type: kotlin.String? = null,
-
+    @get:JsonProperty("type")
+    val type: kotlin.String? = null
     /* Timestamp for when the todo was created */
-    @field:JsonProperty("createdAt")
-    val createdAt: kotlin.String? = null,
-
+    @get:JsonProperty("createdAt")
+    val createdAt: kotlin.String? = null
     /* Whether the todo has been completed */
-    @field:JsonProperty("done")
+    @get:JsonProperty("done")
     val done: kotlin.Boolean? = null
-
-) {
 
     /**
      * The type of source that the todo is from
      *
      * Values: slack,github,bitbucket,makerflow
      */
+    @Suppress("EnumNaming")
     enum class SourceType(val value: kotlin.String) {
         @JsonProperty(value = "slack") slack("slack"),
         @JsonProperty(value = "github") github("github"),
         @JsonProperty(value = "bitbucket") bitbucket("bitbucket"),
         @JsonProperty(value = "makerflow") makerflow("makerflow");
     }
+
 }
 

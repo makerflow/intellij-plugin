@@ -19,53 +19,26 @@ package co.makerflow.client.models
 import com.fasterxml.jackson.annotation.JsonProperty
 
 /**
- * 
  *
- * @param type 
- * @param sourceType 
- * @param createdAt 
- * @param step 
- * @param done 
+ *
+ * @param sourceType
+ * @param type
+ * @param createdAt
+ * @param done
+ * @param step
  */
 
 
 data class OnboardingTask (
 
-    @field:JsonProperty("type")
-    val type: OnboardingTask.Type? = null,
-
-    @field:JsonProperty("sourceType")
-    val sourceType: OnboardingTask.SourceType? = null,
-
-    @field:JsonProperty("createdAt")
-    val createdAt: kotlin.String? = null,
 
     @field:JsonProperty("step")
-    val step: OnboardingTask.Step? = null,
+    val step: OnboardingTask.Step? = null
 
-    @field:JsonProperty("done")
-    val done: kotlin.Boolean? = null
-
-) {
+): TypedTodo() {
 
     /**
-     * 
      *
-     * Values: onboarding
-     */
-    enum class Type(val value: kotlin.String) {
-        @JsonProperty(value = "onboarding") onboarding("onboarding");
-    }
-    /**
-     * 
-     *
-     * Values: makerflow
-     */
-    enum class SourceType(val value: kotlin.String) {
-        @JsonProperty(value = "makerflow") makerflow("makerflow");
-    }
-    /**
-     * 
      *
      * Values: chatMinusIntegration,repoMinusIntegration,calendarMinusIntegration,cliMinusDownload,editorMinusIntegration,browserMinusExtension
      */

@@ -23,6 +23,8 @@
         <applicationService serviceImplementation="co.makerflow.intellijplugin.settings.CredentialAttributesProvider"/>
         <applicationService serviceImplementation="co.makerflow.intellijplugin.state.FlowState"/>
         <statusBarWidgetFactory implementation="co.makerflow.intellijplugin.status.FlowStatusBarWidgetFactory" />
+        <toolWindow id="Unified Tasks List" anchor="bottom"
+                    factoryClass="co.makerflow.intellijplugin.panels.TasksToolWindowFactory" />
     </extensions>
 
     <actions>

@@ -22,6 +22,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 /**
  * A custom task todo
  *
+ * @param task
  * @param sourceType The type of source that the todo is from
  * @param type The type of todo
  * @param createdAt Timestamp for when the todo was created
@@ -31,21 +32,9 @@ import com.fasterxml.jackson.annotation.JsonProperty
 
 data class CustomTaskTodo (
 
-    /* The type of source that the todo is from */
-    @field:JsonProperty("sourceType")
-    val sourceType: kotlin.String? = null,
+    @field:JsonProperty("task")
+    val task: CustomTask,
 
-    /* The type of todo */
-    @field:JsonProperty("type")
-    val type: kotlin.String? = null,
 
-    /* Timestamp for when the todo was created */
-    @field:JsonProperty("createdAt")
-    val createdAt: kotlin.String? = null,
-
-    /* Whether the todo has been completed */
-    @field:JsonProperty("done")
-    val done: kotlin.Boolean? = null
-
-)
+): TypedTodo()
 

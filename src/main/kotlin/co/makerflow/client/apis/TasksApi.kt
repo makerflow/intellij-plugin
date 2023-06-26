@@ -16,7 +16,6 @@
 package co.makerflow.client.apis
 
 import co.makerflow.client.models.CalendarEvent
-import co.makerflow.client.models.MarkDone200Response
 import co.makerflow.client.models.MarkDoneRequest
 import co.makerflow.client.models.TypedTodo
 
@@ -73,10 +72,10 @@ import com.fasterxml.jackson.databind.ObjectMapper
         * 
          * @param source To specify source of request (optional)
          * @param markDoneRequest Task to be marked as completed (optional)
-         * @return MarkDone200Response
+         * @return TypedTodo
         */
             @Suppress("UNCHECKED_CAST")
-        open suspend fun markDone(source: kotlin.String?, markDoneRequest: MarkDoneRequest?): HttpResponse<MarkDone200Response> {
+        open suspend fun markDone(source: kotlin.String?, markDoneRequest: MarkDoneRequest?): HttpResponse<TypedTodo> {
 
             val localVariableAuthNames = listOf<String>("api_token")
 

@@ -15,7 +15,7 @@
 
 package co.makerflow.client.models
 
-import co.makerflow.client.models.MarkDoneRequestTodo
+import co.makerflow.client.models.TypedTodo
 
 import com.fasterxml.jackson.annotation.JsonProperty
 
@@ -30,7 +30,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 data class MarkDoneRequest (
 
     @field:JsonProperty("todo")
-    val todo: MarkDoneRequestTodo? = null,
+    val todo: TypedTodo? = null,
 
     @field:JsonProperty("done")
     val done: kotlin.Boolean? = null

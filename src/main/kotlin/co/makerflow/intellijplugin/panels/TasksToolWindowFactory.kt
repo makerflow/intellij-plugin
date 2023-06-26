@@ -8,7 +8,9 @@ import com.intellij.openapi.wm.ToolWindowFactory
 class TasksToolWindowFactory : ToolWindowFactory, DumbAware {
     override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
         val contentManager = toolWindow.contentManager
-        val content = contentManager.factory.createContent(TasksPanel(), null, true)
+        val tasksPanel = TasksPanel()
+        val content = contentManager.factory.createContent(tasksPanel, null, true)
         contentManager.addContent(content)
+        toolWindow.setTitleActions(listOf(tasksPanel.reloadAction))
     }
 }

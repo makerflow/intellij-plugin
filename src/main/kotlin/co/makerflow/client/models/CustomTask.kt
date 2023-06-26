@@ -25,6 +25,8 @@ import com.fasterxml.jackson.annotation.JsonProperty
  * @param title Title for task
  * @param createdAt Timestamp for when the custom task was created
  * @param done Whether the custom task has been completed
+ * @param userId The id of the user that created the custom task
+ * @param updatedAt Timestamp for when the custom task was last updated
  */
 
 
@@ -39,12 +41,20 @@ data class CustomTask (
     val title: kotlin.String? = null,
 
     /* Timestamp for when the custom task was created */
-    @field:JsonProperty("createdAt")
+    @field:JsonProperty("created_at")
     val createdAt: kotlin.String? = null,
 
     /* Whether the custom task has been completed */
     @field:JsonProperty("done")
-    val done: kotlin.Boolean? = null
+    val done: kotlin.Boolean? = null,
+
+    /* The id of the user that created the custom task */
+    @field:JsonProperty("user_id")
+    val userId: kotlin.Int? = null,
+
+    /* Timestamp for when the custom task was last updated */
+    @field:JsonProperty("updated_at")
+    val updatedAt: kotlin.String? = null
 
 )
 

@@ -2,6 +2,7 @@ package co.makerflow.intellijplugin.services
 
 import co.makerflow.client.apis.TasksApi
 import co.makerflow.client.infrastructure.ApiClient
+import co.makerflow.client.models.MarkDoneRequest
 import co.makerflow.client.models.TypedTodo
 import co.makerflow.intellijplugin.settings.SettingsState
 import com.intellij.openapi.components.Service
@@ -44,15 +45,38 @@ class TasksService {
                             /*
                            Intentionally left blank
                            */
-                           thisLogger().error(e)
-                           thisLogger().error("Error serializing tasks : ${e.message}")
+                            thisLogger().error(e)
+                            thisLogger().error("Error serializing tasks : ${e.message}")
                         }
 
-                        else -> throw e
+                        else -> {
+                            thisLogger().error(e)
+                            thisLogger().error("Error serializing tasks : ${e.message}")
+                            throw e
+                        }
                     }
                 }
             }.join()
             return@coroutineScope tasks
+        }
+    }
+
+    suspend fun markTaskDone(task: TypedTodo): Boolean {
+        return updateTaskStatus(task, true)
+    }
+
+    suspend fun markTaskUndone(task: TypedTodo): Boolean {
+        return updateTaskStatus(task, false)
+    }
+
+    private suspend fun updateTaskStatus(task: TypedTodo, done: Boolean): Boolean {
+        return coroutineScope {
+            var success = false
+            launch {
+                val response = tasksApi().markDone("jetbrains", MarkDoneRequest(todo = task, done))
+                success = response.success
+            }.join()
+            return@coroutineScope success
         }
     }
 

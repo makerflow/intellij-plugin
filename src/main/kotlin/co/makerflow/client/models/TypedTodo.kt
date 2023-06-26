@@ -46,7 +46,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
     JsonSubTypes.Type(value = OnboardingTask::class, name = "onboarding")
 )
 
-open class TypedTodo() {
+open class TypedTodo {
 
     /* The type of source that the todo is from */
     @get:JsonProperty("sourceType")
@@ -59,7 +59,7 @@ open class TypedTodo() {
     val createdAt: kotlin.String? = null
     /* Whether the todo has been completed */
     @get:JsonProperty("done")
-    val done: kotlin.Boolean? = null
+    var done: kotlin.Boolean? = null
 
     /**
      * The type of source that the todo is from

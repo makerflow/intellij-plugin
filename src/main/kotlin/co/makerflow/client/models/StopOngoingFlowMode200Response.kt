@@ -16,6 +16,7 @@
 package co.makerflow.client.models
 
 import co.makerflow.client.models.EndedFlowMode
+import co.makerflow.client.models.TypedTodo
 
 import com.fasterxml.jackson.annotation.JsonProperty
 
@@ -23,13 +24,17 @@ import com.fasterxml.jackson.annotation.JsonProperty
  * 
  *
  * @param `data` 
+ * @param todo 
  */
 
 
 data class StopOngoingFlowMode200Response (
 
     @field:JsonProperty("data")
-    val `data`: EndedFlowMode? = null
+    val `data`: EndedFlowMode? = null,
+
+    @field:JsonProperty("todo")
+    val todo: TypedTodo? = null
 
 )
 

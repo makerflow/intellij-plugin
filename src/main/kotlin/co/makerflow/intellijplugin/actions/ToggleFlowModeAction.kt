@@ -2,14 +2,14 @@ package co.makerflow.intellijplugin.actions
 
 import co.makerflow.intellijplugin.services.FlowModeService
 import co.makerflow.intellijplugin.services.toFlow
-import co.makerflow.intellijplugin.state.Flow
 import co.makerflow.intellijplugin.state.FlowState
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.service
-import kotlinx.coroutines.*
-import kotlinx.datetime.Instant
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class ToggleFlowModeAction : AnAction("Toggle Flow Mode", "Begin or end flow mode based on current status", null) {
 

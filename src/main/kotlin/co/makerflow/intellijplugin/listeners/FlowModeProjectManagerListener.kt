@@ -35,8 +35,8 @@ class FlowModeProjectManagerListener : ProjectManagerListener {
                 coroutineScope.launch {
                     val flowModeService = service<FlowModeService>()
                     val ongoingFlowMode = flowModeService.fetchOngoingFlowMode()
-                    ongoingFlowMode?.let { flowMode ->
-                        FlowState.instance.currentFlow = flowMode.toFlow()
+                    ongoingFlowMode.let { pair ->
+                        FlowState.instance.currentFlow = pair.first?.toFlow(pair.second)
                     }
                 }
             }

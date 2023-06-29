@@ -15,7 +15,6 @@
 
 package co.makerflow.client.models
 
-import co.makerflow.client.models.FetchOngoingFlowMode200ResponseAnyOf
 import co.makerflow.client.models.FlowMode
 import co.makerflow.client.models.TypedTodo
 
@@ -29,7 +28,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
  */
 
 
-data class FetchOngoingFlowMode200Response (
+data class FetchOngoingFlowMode200ResponseAnyOf (
 
     @field:JsonProperty("data")
     val `data`: FlowMode? = null,

@@ -12,13 +12,13 @@ plugins {
     kotlin("jvm") version "1.8.20"
     kotlin("plugin.serialization") version "1.8.20"
     // Gradle IntelliJ Plugin
-    id("org.jetbrains.intellij") version "1.14.1"
+    id("org.jetbrains.intellij") version "1.14.2"
     // Gradle Changelog Plugin
     id("org.jetbrains.changelog") version "2.1.0"
     // Gradle Qodana Plugin
     id("org.jetbrains.qodana") version "0.1.13"
     // Dokka
-    id("org.jetbrains.dokka") version "1.8.10"
+    id("org.jetbrains.dokka") version "1.8.20"
     // IDEA support
     id("idea")
 }
@@ -31,7 +31,7 @@ repositories {
     mavenCentral()
 }
 
-val ktorVersion = "2.1.3"
+val ktorVersion = "2.3.2"
 dependencies {
     implementation("com.github.kittinunf.fuel:fuel:2.3.1")
     implementation("com.github.kittinunf.fuel:fuel-jackson:2.3.1")
@@ -42,13 +42,17 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:4.9.3")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.3")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.12.3")
-    implementation("io.ktor:ktor-client-core:$ktorVersion")
-    implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
-    implementation("io.ktor:ktor-client-jackson:$ktorVersion")
-    implementation("io.ktor:ktor-client-java:$ktorVersion")
-    implementation("io.ktor:ktor-serialization-jackson:$ktorVersion")
+    val excludeFromKtor: (ExternalModuleDependency).() -> Unit = {
+        exclude(group = "org.jetbrains.kotlinx", module = "kotlinx-coroutines-core")
+        exclude(group = "org.jetbrains.kotlinx", module = "kotlinx-coroutines-jdk8")
+        exclude(group = "org.slf4j", module = "slf4j-api")
+    }
+    implementation("io.ktor:ktor-client-core:$ktorVersion", excludeFromKtor)
+    implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion", excludeFromKtor)
+    implementation("io.ktor:ktor-client-jackson:$ktorVersion", excludeFromKtor)
+    implementation("io.ktor:ktor-client-cio:$ktorVersion", excludeFromKtor)
+    implementation("io.ktor:ktor-serialization-jackson:$ktorVersion", excludeFromKtor)
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
 }
 
 // Set the JVM language level used to build the project. Use Java 11 for 2020.3+, and Java 17 for 2022.2+.

@@ -25,17 +25,12 @@
         <statusBarWidgetFactory implementation="co.makerflow.intellijplugin.status.FlowStatusBarWidgetFactory" />
         <toolWindow id="Unified Tasks List" anchor="bottom"
                     factoryClass="co.makerflow.intellijplugin.panels.TasksToolWindowFactory" />
+        <postStartupActivity implementation="co.makerflow.intellijplugin.listeners.FlowModePostStartupActivity"/>
     </extensions>
 
     <actions>
         <action class="co.makerflow.intellijplugin.actions.ToggleFlowModeAction" id="ToggleFlowMode">
         </action>
     </actions>
-
-    <applicationListeners>
-        <listener class="co.makerflow.intellijplugin.listeners.FlowModeProjectManagerListener"
-                  topic="com.intellij.openapi.project.ProjectManagerListener"/>
-    </applicationListeners>
-
 
 </idea-plugin>

@@ -1,6 +1,16 @@
 package co.makerflow.client.infrastructure
 
 
+import co.makerflow.client.auth.ApiKeyAuth
+import co.makerflow.client.auth.Authentication
+import co.makerflow.client.auth.HttpBasicAuth
+import co.makerflow.client.auth.HttpBearerAuth
+import co.makerflow.client.auth.OAuth
+import com.fasterxml.jackson.core.util.DefaultIndenter
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
 import io.ktor.client.engine.HttpClientEngine
@@ -12,16 +22,17 @@ import io.ktor.client.request.parameter
 import io.ktor.client.request.request
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
+import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpMethod
+import io.ktor.http.Parameters
+import io.ktor.http.URLBuilder
 import io.ktor.http.content.PartData
-import io.ktor.serialization.jackson.*
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.core.util.DefaultIndenter
-import com.fasterxml.jackson.core.util.DefaultPrettyPrinter
-import co.makerflow.client.auth.*
-import io.ktor.http.*
+import io.ktor.http.contentType
+import io.ktor.http.encodeURLQueryComponent
+import io.ktor.http.encodedPath
+import io.ktor.http.takeFrom
+import io.ktor.serialization.jackson.jackson
 
 open class ApiClient(
         private val baseUrl: String,

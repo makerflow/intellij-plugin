@@ -8,23 +8,22 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.project.ProjectManagerListener
+import com.intellij.openapi.startup.ProjectActivity
 import com.intellij.util.concurrency.AppExecutorUtil
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 
 
 private const val DELAY_BETWEEN_FETCHES = 10L
 
-class FlowModeProjectManagerListener : ProjectManagerListener {
+class FlowModePostStartupActivity : ProjectActivity {
 
     // A new Job to fetch the ongoing flow mode
     private val coroutineScope = CoroutineScope(Dispatchers.IO)
 
 
-    override fun projectOpened(project: Project) {
+    override suspend fun execute(project: Project) {
 
         service<HeartbeatService>().heartbeat()
 
@@ -35,17 +34,13 @@ class FlowModeProjectManagerListener : ProjectManagerListener {
                 coroutineScope.launch {
                     val flowModeService = service<FlowModeService>()
                     val ongoingFlowMode = flowModeService.fetchOngoingFlowMode()
-                    ongoingFlowMode?.let { flowMode ->
-                        FlowState.instance.currentFlow = flowMode.toFlow()
+                    ongoingFlowMode.let { pair ->
+                        FlowState.instance.currentFlow = pair.first?.toFlow(pair.second)
                     }
                 }
             }
         }, 0, DELAY_BETWEEN_FETCHES, java.util.concurrent.TimeUnit.SECONDS)
     }
 
-    override fun projectClosing(project: Project) {
-        super.projectClosing(project)
-        coroutineScope.cancel()
-    }
 }
 

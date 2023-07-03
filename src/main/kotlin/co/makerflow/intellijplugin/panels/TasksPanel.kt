@@ -17,20 +17,18 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.observable.properties.AtomicBooleanProperty
-import com.intellij.openapi.observable.util.not
 import com.intellij.openapi.ui.SimpleToolWindowPanel
 import com.intellij.ui.JBColor
 import com.intellij.ui.RoundedLineBorder
 import com.intellij.ui.components.JBPanel
 import com.intellij.ui.components.JBScrollPane
+import com.intellij.ui.dsl.builder.Align
+import com.intellij.ui.dsl.builder.AlignX
 import com.intellij.ui.dsl.builder.BottomGap
 import com.intellij.ui.dsl.builder.Row
 import com.intellij.ui.dsl.builder.RowLayout
 import com.intellij.ui.dsl.builder.panel
-import com.intellij.ui.dsl.builder.visibleIf
 import com.intellij.ui.dsl.gridLayout.Gaps
-import com.intellij.ui.dsl.gridLayout.HorizontalAlign
-import com.intellij.ui.dsl.gridLayout.VerticalAlign
 import com.intellij.util.concurrency.AppExecutorUtil
 import com.intellij.util.ui.AsyncProcessIcon
 import com.intellij.util.ui.JBUI
@@ -65,13 +63,11 @@ class TasksPanel : SimpleToolWindowPanel(true) {
             cell(
                 AsyncProcessIcon.BigCentered("Loading tasks...")
             )
-                .horizontalAlign(HorizontalAlign.CENTER)
-                .verticalAlign(VerticalAlign.CENTER)
+                .align(Align.CENTER)
         }
         row {
             label("Please wait, loading tasks...")
-                .horizontalAlign(HorizontalAlign.CENTER)
-                .verticalAlign(VerticalAlign.CENTER)
+                .align(Align.CENTER)
         }
     }.apply {
         border = JBUI.Borders.empty()
@@ -127,8 +123,7 @@ class TasksPanel : SimpleToolWindowPanel(true) {
                     val noTasksMessage = panel {
                         row {
                             label("No new tasks, you are a free bird!")
-                                .horizontalAlign(HorizontalAlign.CENTER)
-                                .verticalAlign(VerticalAlign.CENTER)
+                                .align(Align.CENTER)
                         }
                     }.apply {
                         border = JBUI.Borders.empty()
@@ -271,17 +266,26 @@ class TaskPresentationComponent(
                                         }
                                     }
                                 }
-                                    .visibleIf(property = showStopButton)
                                     .applyToComponent {
                                         this.toolTipText = "Stop flow mode"
+                                }.apply {
+                                    visible(showStopButton.get())
+                                    showStopButton.afterChange {
+                                        visible(it)
+                                    }
                                     }
                                 label("Stopping...")
-                                    .horizontalAlign(HorizontalAlign.LEFT)
+                                .align(AlignX.LEFT)
                                     .customize(Gaps())
-                                    .visibleIf(property = stoppingFlowMode)
+                                .apply {
+                                    visible(stoppingFlowMode.get())
+                                    stoppingFlowMode.afterChange {
+                                        visible(it)
+                                    }
+                                }
                                 startFlowModeDropdown(value, showDropdown)
                         }
-                        icon(getIconForType(value.type!!)).horizontalAlign(HorizontalAlign.CENTER)
+                        icon(getIconForType(value.type!!)).align(AlignX.CENTER)
                         if (link != null) {
                             browserLink(taskTitle!!, link)
                         } else {
@@ -304,7 +308,6 @@ class TaskPresentationComponent(
 
     private fun Row.startFlowModeDropdown(value: TypedTodo?, showDropdown: AtomicBooleanProperty) {
         val startingFlowMode = AtomicBooleanProperty(false)
-        @Suppress("UnstableApiUsage")
         dropDownLink(
             "Start",
             listOf(
@@ -312,14 +315,14 @@ class TaskPresentationComponent(
                 FLOW_MODE_DROPDOWN_25_MINUTES,
                 FLOW_MODE_DROPDOWN_50_MINUTES,
                 FLOW_MODE_DROPDOWN_75_MINUTES,
-            ),
-            {
+            )
+        ).onChanged {
                 val flowModeService = service<FlowModeService>()
                 beginFlowModeCoroutineScope.launch {
                     showDropdown.set(false)
                     startingFlowMode.set(true)
                     try {
-                        val flowMode = when (it) {
+                        val flowMode = when (it.selectedItem) {
                             FLOW_MODE_DROPDOWN_WITHOUT_TIMER -> {
                                 flowModeService.startFlowMode(value, time = null)
                             }
@@ -348,17 +351,25 @@ class TaskPresentationComponent(
                     }
                     reloadAction.reload()
                 }
-            },
-            false
-        )
-            .visibleIf(property = showDropdown)
+            }
+            .apply {
+                visible(showDropdown.get())
+                showDropdown.afterChange {
+                    visible(it)
+                }
+            }
             .applyToComponent {
                 this.toolTipText = "Start a flow mode session for this task"
             }
         label("Starting...")
-            .horizontalAlign(HorizontalAlign.LEFT)
+            .align(AlignX.LEFT)
             .customize(Gaps())
-            .visibleIf(property = startingFlowMode)
+            .apply {
+                visible(startingFlowMode.get())
+                startingFlowMode.afterChange {
+                    visible(it)
+                }
+            }
     }
 
     private fun getTaskTitle(value: TypedTodo?) = when (value) {
@@ -450,6 +461,9 @@ class TaskPresentationComponent(
         }
         if (sourceDescription.isEmpty()) {
             return createdAt
+        }
+        if (createdAt.isEmpty()) {
+            return sourceDescription
         }
         return "$sourceDescription | $createdAt"
     }

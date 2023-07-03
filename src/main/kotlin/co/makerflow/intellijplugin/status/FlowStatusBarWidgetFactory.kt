@@ -8,16 +8,20 @@ import com.intellij.openapi.wm.impl.status.widget.StatusBarEditorBasedWidgetFact
 
 @Suppress("UnstableApiUsage")
 class FlowStatusBarWidgetFactory : StatusBarEditorBasedWidgetFactory(), LightEditCompatible {
+
+    private val id = "co.makerflow.intellijplugin"
+
     override fun getId(): String {
-        return "MakerflowFlowStatus"
+        return id
     }
 
     override fun getDisplayName(): String {
+        @Suppress("DialogTitleCapitalization")
         return "Flow Mode status"
     }
 
     override fun createWidget(project: Project): StatusBarWidget {
-        return co.makerflow.intellijplugin.status.FlowStatusBarWidget(project)
+        return FlowStatusBarWidget(project)
     }
 
     override fun disposeWidget(widget: StatusBarWidget) {

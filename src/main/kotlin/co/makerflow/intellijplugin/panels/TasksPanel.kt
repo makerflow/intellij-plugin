@@ -324,19 +324,19 @@ class TaskPresentationComponent(
                     try {
                         val flowMode = when (it.selectedItem) {
                             FLOW_MODE_DROPDOWN_WITHOUT_TIMER -> {
-                                flowModeService.startFlowMode(value, time = null)
+                                flowModeService.startFlowMode(value, duration = null)
                             }
 
                             FLOW_MODE_DROPDOWN_25_MINUTES -> {
-                                flowModeService.startFlowMode(value, time = 25)
+                                flowModeService.startFlowMode(value, duration = 25)
                             }
 
                             FLOW_MODE_DROPDOWN_50_MINUTES -> {
-                                flowModeService.startFlowMode(value, time = 50)
+                                flowModeService.startFlowMode(value, duration = 50)
                             }
 
                             FLOW_MODE_DROPDOWN_75_MINUTES -> {
-                                flowModeService.startFlowMode(value, time = 75)
+                                flowModeService.startFlowMode(value, duration = 75)
                             }
 
                             else -> null

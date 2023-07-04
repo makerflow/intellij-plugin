@@ -25,7 +25,7 @@ class FlowModeService {
     suspend fun startFlowMode(): FlowMode? {
         return startFlowMode(null, null)
     }
-    suspend fun startFlowMode(todo: TypedTodo?, time: Int?): FlowMode? {
+    suspend fun startFlowMode(todo: TypedTodo?, duration: Int?): FlowMode? {
 
         return coroutineScope {
             var flowMode: FlowMode? = null
@@ -33,7 +33,7 @@ class FlowModeService {
                 val flowModeApi = flowModeApi()
                 val startFlowModeResponse = flowModeApi.startFlowMode("jetbrains",
                     false,
-                    time,
+                    duration,
                     todo?.sourceType?.name,
                     todo?.type,
                     todo?.let { todoUtil.determineTodoId(todo) })

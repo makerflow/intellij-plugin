@@ -9,8 +9,7 @@ import com.intellij.openapi.wm.impl.status.widget.StatusBarEditorBasedWidgetFact
 @Suppress("UnstableApiUsage")
 class FlowStatusBarWidgetFactory : StatusBarEditorBasedWidgetFactory(), LightEditCompatible {
 
-    private val id = "co.makerflow.intellijplugin"
-
+    private val id = "co.makerflow.intellijplugin.FlowStatusBarWidgetFactory"
     override fun getId(): String {
         return id
     }

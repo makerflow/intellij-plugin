@@ -22,15 +22,30 @@
         <applicationService serviceImplementation="co.makerflow.intellijplugin.settings.SettingsState"/>
         <applicationService serviceImplementation="co.makerflow.intellijplugin.settings.CredentialAttributesProvider"/>
         <applicationService serviceImplementation="co.makerflow.intellijplugin.state.FlowState"/>
-        <statusBarWidgetFactory implementation="co.makerflow.intellijplugin.status.FlowStatusBarWidgetFactory" />
+        <statusBarWidgetFactory implementation="co.makerflow.intellijplugin.status.FlowStatusBarWidgetFactory"
+                                id="co.makerflow.intellijplugin.FlowStatusBarWidgetFactory" />
         <toolWindow id="Unified Tasks List" anchor="bottom"
                     factoryClass="co.makerflow.intellijplugin.panels.TasksToolWindowFactory" />
         <postStartupActivity implementation="co.makerflow.intellijplugin.listeners.FlowModePostStartupActivity"/>
     </extensions>
 
     <actions>
-        <action class="co.makerflow.intellijplugin.actions.ToggleFlowModeAction" id="ToggleFlowMode">
-        </action>
+        <group id="co.makerflow.intellijplugin.actions.flowmode.FlowModeActionGroup"
+                class="co.makerflow.intellijplugin.actions.flowmode.FlowModeActionGroup"
+               description="Start or stop Flow Mode" searchable="false"
+               text="Start/Stop Flow Mode">
+        <action class="co.makerflow.intellijplugin.actions.flowmode.ToggleFlowModeAction"
+                id="co.makerflow.intellijplugin.actions.flowmode.ToggleFlowModeAction" />
+        <action id="co.makerflow.intellijplugin.actions.flowmode.TwentyFiveMinutesFlowModeAction"
+                class="co.makerflow.intellijplugin.actions.flowmode.TwentyFiveMinutesFlowModeAction"
+                text="Flow Mode (25 Minutes)" description="Begin a timed Flow Mode session for 25 minutes"/>
+        <action id="co.makerflow.intellijplugin.actions.flowmode.FiftyMinutesFlowModeAction"
+                class="co.makerflow.intellijplugin.actions.flowmode.FiftyMinutesFlowModeAction"
+                text="Flow Mode (50 Minutes)" description="Begin a timed Flow Mode session for 50 minutes"/>
+        <action id="co.makerflow.intellijplugin.actions.flowmode.SeventyFiveMinutesFlowModeAction"
+                class="co.makerflow.intellijplugin.actions.flowmode.SeventyFiveMinutesFlowModeAction"
+                text="Flow Mode (75 Minutes)" description="Begin a timed Flow Mode session for 75 minutes"/>
+        </group>
     </actions>
 
 </idea-plugin>

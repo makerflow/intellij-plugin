@@ -46,6 +46,9 @@
                 class="co.makerflow.intellijplugin.actions.flowmode.SeventyFiveMinutesFlowModeAction"
                 text="Flow Mode (75 Minutes)" description="Begin a timed Flow Mode session for 75 minutes"/>
         </group>
+        <action id="co.makerflow.intellijplugin.actions.tasks.AddCustomTaskAction"
+                class="co.makerflow.intellijplugin.actions.tasks.AddCustomTaskAction" text="Makerflow: Add Task"
+                description="Add a new task to the Makerflow task list"/>
     </actions>
 
 </idea-plugin>

@@ -20,6 +20,8 @@ track of all your notifications.
   - Close distracting apps with the Makerflow desktop app
 - Added a tool window to see items in Unified Task List
   - See all your notifications from GitHub/Bitbucket in your IDE
+  - Add new tasks
+  - Start Flow Mode for a task to focus on it
 
 ### Changed
 

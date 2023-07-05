@@ -38,6 +38,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
  * @param pr
  * @param meta
  */
+@Suppress("ConvertSecondaryConstructorToPrimary")
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type", visible = true)
 @JsonSubTypes(
     JsonSubTypes.Type(value = PullRequestTodo::class, name = "bitbucket"),
@@ -50,13 +51,13 @@ open class TypedTodo {
 
     /* The type of source that the todo is from */
     @get:JsonProperty("sourceType")
-    val sourceType: TypedTodo.SourceType? = null
+    var sourceType: TypedTodo.SourceType? = null
     /* The type of todo */
     @get:JsonProperty("type")
-    val type: kotlin.String? = null
+    var type: kotlin.String? = null
     /* Timestamp for when the todo was created */
     @get:JsonProperty("createdAt")
-    val createdAt: kotlin.String? = null
+    var createdAt: kotlin.String? = null
     /* Whether the todo has been completed */
     @get:JsonProperty("done")
     var done: kotlin.Boolean? = null

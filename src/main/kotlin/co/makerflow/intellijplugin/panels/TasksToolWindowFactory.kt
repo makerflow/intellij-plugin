@@ -1,5 +1,6 @@
 package co.makerflow.intellijplugin.panels
 
+import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.project.DumbAware
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindow
@@ -11,6 +12,11 @@ class TasksToolWindowFactory : ToolWindowFactory, DumbAware {
         val tasksPanel = TasksPanel()
         val content = contentManager.factory.createContent(tasksPanel, null, true)
         contentManager.addContent(content)
-        toolWindow.setTitleActions(listOf(tasksPanel.reloadAction))
+        toolWindow.setTitleActions(
+            listOf(
+                tasksPanel.reloadAction,
+                ActionManager.getInstance().getAction("co.makerflow.intellijplugin.actions.tasks.AddCustomTaskAction")
+            )
+        )
     }
 }

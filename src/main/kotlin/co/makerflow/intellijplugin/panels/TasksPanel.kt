@@ -6,6 +6,7 @@ import co.makerflow.client.models.OnboardingTask.Step
 import co.makerflow.client.models.PullRequestTodo
 import co.makerflow.client.models.TypedTodo
 import co.makerflow.intellijplugin.services.FlowModeService
+import co.makerflow.intellijplugin.services.TaskAdded
 import co.makerflow.intellijplugin.services.TasksService
 import co.makerflow.intellijplugin.services.TodoUtil
 import co.makerflow.intellijplugin.services.toFlow
@@ -98,7 +99,6 @@ class TasksPanel : SimpleToolWindowPanel(true) {
 
     init {
 
-
         super.setContent(loadingMessageContent)
 
         ApplicationManager.getApplication().invokeLater {
@@ -110,6 +110,16 @@ class TasksPanel : SimpleToolWindowPanel(true) {
                 loadTasks()
             }
         }, INITIAL_DELAY_TO_RELOAD_TASKS, DELAY_TO_RELOAD_TASKS, java.util.concurrent.TimeUnit.SECONDS)
+
+        // Listen for TasksAdded messages on the message bus
+        ApplicationManager.getApplication().messageBus.connect().subscribe(
+            TasksService.TASKS_ADDED_TOPIC,
+            TaskAdded {
+                ApplicationManager.getApplication().invokeLater {
+                    loadTasks()
+                }
+            }
+        )
 
     }
 
@@ -243,47 +253,47 @@ class TaskPresentationComponent(
                 panel {
                     row {
                         if (value !is OnboardingTask) {
-                                val isTodoInFlow = todoUtil.isTodoInFlow(value)
-                                val showDropdown = AtomicBooleanProperty(!isTodoInFlow)
-                                val showStopButton = AtomicBooleanProperty(isTodoInFlow)
-                                val stoppingFlowMode = AtomicBooleanProperty(false)
-                                link("Stop") {
-                                    stoppingFlowMode.set(true)
-                                    showStopButton.set(false)
-                                    endFlowModeCoroutineScope.launch {
-                                        try {
-                                            service<FlowModeService>().stopFlowMode()
-                                            FlowState.instance.currentFlow = null
-                                            stoppingFlowMode.set(false)
-                                            showStopButton.set(false)
-                                            showDropdown.set(true)
-                                            reloadAction.reload()
-                                        } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
-                                            thisLogger().error("Error stopping flow mode", e)
-                                            stoppingFlowMode.set(false)
-                                            showStopButton.set(true)
-                                            throw e
-                                        }
+                            val isTodoInFlow = todoUtil.isTodoInFlow(value)
+                            val showDropdown = AtomicBooleanProperty(!isTodoInFlow)
+                            val showStopButton = AtomicBooleanProperty(isTodoInFlow)
+                            val stoppingFlowMode = AtomicBooleanProperty(false)
+                            link("Stop") {
+                                stoppingFlowMode.set(true)
+                                showStopButton.set(false)
+                                endFlowModeCoroutineScope.launch {
+                                    try {
+                                        service<FlowModeService>().stopFlowMode()
+                                        FlowState.instance.currentFlow = null
+                                        stoppingFlowMode.set(false)
+                                        showStopButton.set(false)
+                                        showDropdown.set(true)
+                                        reloadAction.reload()
+                                    } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+                                        thisLogger().error("Error stopping flow mode", e)
+                                        stoppingFlowMode.set(false)
+                                        showStopButton.set(true)
+                                        throw e
                                     }
                                 }
-                                    .applyToComponent {
-                                        this.toolTipText = "Stop flow mode"
+                            }
+                                .applyToComponent {
+                                    this.toolTipText = "Stop flow mode"
                                 }.apply {
                                     visible(showStopButton.get())
                                     showStopButton.afterChange {
                                         visible(it)
                                     }
-                                    }
-                                label("Stopping...")
+                                }
+                            label("Stopping...")
                                 .align(AlignX.LEFT)
-                                    .customize(Gaps())
+                                .customize(Gaps())
                                 .apply {
                                     visible(stoppingFlowMode.get())
                                     stoppingFlowMode.afterChange {
                                         visible(it)
                                     }
                                 }
-                                startFlowModeDropdown(value, showDropdown)
+                            startFlowModeDropdown(value, showDropdown)
                         }
                         icon(getIconForType(value.type!!)).align(AlignX.CENTER)
                         if (link != null) {
@@ -317,41 +327,41 @@ class TaskPresentationComponent(
                 FLOW_MODE_DROPDOWN_75_MINUTES,
             )
         ).onChanged {
-                val flowModeService = service<FlowModeService>()
-                beginFlowModeCoroutineScope.launch {
-                    showDropdown.set(false)
-                    startingFlowMode.set(true)
-                    try {
-                        val flowMode = when (it.selectedItem) {
-                            FLOW_MODE_DROPDOWN_WITHOUT_TIMER -> {
-                                flowModeService.startFlowMode(value, duration = null)
-                            }
-
-                            FLOW_MODE_DROPDOWN_25_MINUTES -> {
-                                flowModeService.startFlowMode(value, duration = 25)
-                            }
-
-                            FLOW_MODE_DROPDOWN_50_MINUTES -> {
-                                flowModeService.startFlowMode(value, duration = 50)
-                            }
-
-                            FLOW_MODE_DROPDOWN_75_MINUTES -> {
-                                flowModeService.startFlowMode(value, duration = 75)
-                            }
-
-                            else -> null
+            val flowModeService = service<FlowModeService>()
+            beginFlowModeCoroutineScope.launch {
+                showDropdown.set(false)
+                startingFlowMode.set(true)
+                try {
+                    val flowMode = when (it.selectedItem) {
+                        FLOW_MODE_DROPDOWN_WITHOUT_TIMER -> {
+                            flowModeService.startFlowMode(value, duration = null)
                         }
-                        if (flowMode != null) {
-                            FlowState.instance.currentFlow = flowMode.toFlow(value)
+
+                        FLOW_MODE_DROPDOWN_25_MINUTES -> {
+                            flowModeService.startFlowMode(value, duration = 25)
                         }
-                    } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
-                        thisLogger().error("Error starting flow mode", e)
-                        showDropdown.set(true)
-                        throw e
+
+                        FLOW_MODE_DROPDOWN_50_MINUTES -> {
+                            flowModeService.startFlowMode(value, duration = 50)
+                        }
+
+                        FLOW_MODE_DROPDOWN_75_MINUTES -> {
+                            flowModeService.startFlowMode(value, duration = 75)
+                        }
+
+                        else -> null
                     }
-                    reloadAction.reload()
+                    if (flowMode != null) {
+                        FlowState.instance.currentFlow = flowMode.toFlow(value)
+                    }
+                } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+                    thisLogger().error("Error starting flow mode", e)
+                    showDropdown.set(true)
+                    throw e
                 }
+                reloadAction.reload()
             }
+        }
             .apply {
                 visible(showDropdown.get())
                 showDropdown.afterChange {

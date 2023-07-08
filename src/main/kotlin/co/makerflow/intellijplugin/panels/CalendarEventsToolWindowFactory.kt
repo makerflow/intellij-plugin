@@ -1,24 +1,18 @@
 package co.makerflow.intellijplugin.panels
 
 import com.intellij.ide.lightEdit.LightEditCompatible
-import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.project.DumbAware
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowFactory
 
 @Suppress("UnstableApiUsage")
-class TasksToolWindowFactory : ToolWindowFactory, DumbAware, LightEditCompatible {
+class CalendarEventsToolWindowFactory: ToolWindowFactory, DumbAware, LightEditCompatible {
     override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
+        val panel = UpcomingEventsPanel()
         val contentManager = toolWindow.contentManager
-        val tasksPanel = TasksPanel()
-        val content = contentManager.factory.createContent(tasksPanel, null, true)
+        val content = contentManager.factory.createContent(panel, null, false)
         contentManager.addContent(content)
-        toolWindow.setTitleActions(
-            listOf(
-                tasksPanel.reloadAction,
-                ActionManager.getInstance().getAction("co.makerflow.intellijplugin.actions.tasks.AddCustomTaskAction")
-            )
-        )
+        toolWindow.setTitleActions(listOf(panel.reloadAction))
     }
 }

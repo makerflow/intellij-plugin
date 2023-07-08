@@ -15,27 +15,28 @@
 
 package co.makerflow.client.models
 
-import co.makerflow.client.models.Conference
-
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 
 /**
  * A event in user's calendar
  *
- * @param id 
- * @param userIntegrationId 
- * @param iCalUID 
- * @param start 
- * @param startTimezone 
- * @param end 
- * @param endTimezone 
- * @param summary 
- * @param htmlLink 
- * @param conference 
+ * @param id
+ * @param userIntegrationId
+ * @param iCalUID
+ * @param start
+ * @param startTimezone
+ * @param end
+ * @param endTimezone
+ * @param summary
+ * @param htmlLink
+ * @param conference
+ * @param providerId
  */
 
 
-data class CalendarEvent (
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class CalendarEvent(
 
     @field:JsonProperty("id")
     val id: kotlin.Int? = null,
@@ -65,7 +66,10 @@ data class CalendarEvent (
     val htmlLink: kotlin.String? = null,
 
     @field:JsonProperty("conference")
-    val conference: Conference? = null
+    val conference: Conference? = null,
+
+    @field:JsonProperty("provider_id")
+    val providerId: kotlin.String? = null
 
 )
 

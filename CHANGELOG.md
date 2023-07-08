@@ -22,6 +22,8 @@ track of all your notifications.
   - See all your notifications from GitHub/Bitbucket in your IDE
   - Add new tasks
   - Start Flow Mode for a task to focus on it
+- Added a tool window to see your calendar events for the next few hours
+  - Join an upcoming event with one click
 
 ### Changed
 

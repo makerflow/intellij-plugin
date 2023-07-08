@@ -15,54 +15,55 @@
 
 package co.makerflow.client.apis
 
-import co.makerflow.client.models.CalendarEvent
-
-import co.makerflow.client.infrastructure.*
-import io.ktor.client.HttpClientConfig
-import io.ktor.client.request.forms.formData
-import io.ktor.client.engine.HttpClientEngine
-import io.ktor.http.ParametersBuilder
+import co.makerflow.client.infrastructure.ApiClient
+import co.makerflow.client.infrastructure.HttpResponse
+import co.makerflow.client.infrastructure.RequestConfig
+import co.makerflow.client.infrastructure.RequestMethod
+import co.makerflow.client.infrastructure.wrap
+import co.makerflow.client.models.UpcomingCalendarEvents200Response
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.ktor.client.HttpClientConfig
+import io.ktor.client.engine.HttpClientEngine
 
-    open class EventsApi(
+open class EventsApi(
     baseUrl: String = ApiClient.BASE_URL,
     httpClientEngine: HttpClientEngine? = null,
     httpClientConfig: ((HttpClientConfig<*>) -> Unit)? = null,
     jsonBlock: ObjectMapper.() -> Unit = ApiClient.JSON_DEFAULT,
-    ) : ApiClient(baseUrl, httpClientEngine, httpClientConfig, jsonBlock) {
+) : ApiClient(baseUrl, httpClientEngine, httpClientConfig, jsonBlock) {
 
-        /**
-        * 
-        * 
-         * @param source To specify source of request (optional)
-         * @return kotlin.collections.List<CalendarEvent>
-        */
-            @Suppress("UNCHECKED_CAST")
-        open suspend fun upcomingCalendarEvents(source: kotlin.String?): HttpResponse<kotlin.collections.List<CalendarEvent>> {
+    /**
+     *
+     *
+     * @param source To specify source of request (optional)
+     * @return UpcomingCalendarEvents200Response
+     */
+    @Suppress("UNCHECKED_CAST")
+    open suspend fun upcomingCalendarEvents(source: kotlin.String?): HttpResponse<UpcomingCalendarEvents200Response> {
 
-            val localVariableAuthNames = listOf<String>("api_token")
+        val localVariableAuthNames = listOf<String>("api_token")
 
-            val localVariableBody = 
-                    io.ktor.client.utils.EmptyContent
+        val localVariableBody =
+            io.ktor.client.utils.EmptyContent
 
-            val localVariableQuery = mutableMapOf<String, List<String>>()
-            source?.apply { localVariableQuery["source"] = listOf("$source") }
+        val localVariableQuery = mutableMapOf<String, List<String>>()
+        source?.apply { localVariableQuery["source"] = listOf("$source") }
 
-            val localVariableHeaders = mutableMapOf<String, String>()
+        val localVariableHeaders = mutableMapOf<String, String>()
 
-            val localVariableConfig = RequestConfig<kotlin.Any?>(
+        val localVariableConfig = RequestConfig<kotlin.Any?>(
             RequestMethod.GET,
             "/tasks/calendar/events",
             query = localVariableQuery,
             headers = localVariableHeaders,
             requiresAuthentication = true,
-            )
+        )
 
-            return request(
+        return request(
             localVariableConfig,
             localVariableBody,
             localVariableAuthNames
-            ).wrap()
-            }
+        ).wrap()
+    }
 
-        }
+}

@@ -15,23 +15,23 @@
 
 package co.makerflow.client.models
 
-import co.makerflow.client.models.ConferenceEntryPoint
-
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 
 /**
- * 
  *
- * @param conferenceId 
- * @param location 
- * @param organizerEmail 
- * @param organizerName 
- * @param status 
- * @param entryPoints 
+ *
+ * @param conferenceId
+ * @param location
+ * @param organizerEmail
+ * @param organizerName
+ * @param status
+ * @param entryPoints
  */
 
 
-data class Conference (
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class Conference(
 
     @field:JsonProperty("conferenceId")
     val conferenceId: kotlin.String? = null,

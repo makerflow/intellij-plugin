@@ -26,6 +26,8 @@
                                 id="co.makerflow.intellijplugin.FlowStatusBarWidgetFactory" />
         <toolWindow id="Unified Tasks List" anchor="bottom"
                     factoryClass="co.makerflow.intellijplugin.panels.TasksToolWindowFactory" />
+        <toolWindow id="Calendar Events" anchor="right"
+                    factoryClass="co.makerflow.intellijplugin.panels.CalendarEventsToolWindowFactory" />
         <postStartupActivity implementation="co.makerflow.intellijplugin.listeners.FlowModePostStartupActivity"/>
     </extensions>
 

@@ -16,17 +16,19 @@
 package co.makerflow.client.models
 
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 
 /**
  * Information about calling into the meeting
  *
- * @param entryPointType 
- * @param label 
- * @param uri 
+ * @param entryPointType
+ * @param label
+ * @param uri
  */
 
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class ConferenceEntryPoint (
 
     @field:JsonProperty("entryPointType")

@@ -15,123 +15,133 @@
 
 package co.makerflow.client.apis
 
+import co.makerflow.client.infrastructure.ApiClient
+import co.makerflow.client.infrastructure.HttpResponse
+import co.makerflow.client.infrastructure.RequestConfig
+import co.makerflow.client.infrastructure.RequestMethod
+import co.makerflow.client.infrastructure.wrap
+import co.makerflow.client.models.BreakReason
 import co.makerflow.client.models.EndedWorkBreak
 import co.makerflow.client.models.WorkBreak
-
-import co.makerflow.client.infrastructure.*
-import io.ktor.client.HttpClientConfig
-import io.ktor.client.request.forms.formData
-import io.ktor.client.engine.HttpClientEngine
-import io.ktor.http.ParametersBuilder
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.ktor.client.HttpClientConfig
+import io.ktor.client.engine.HttpClientEngine
 
-    open class BreaksApi(
+open class BreaksApi(
     baseUrl: String = ApiClient.BASE_URL,
     httpClientEngine: HttpClientEngine? = null,
     httpClientConfig: ((HttpClientConfig<*>) -> Unit)? = null,
     jsonBlock: ObjectMapper.() -> Unit = ApiClient.JSON_DEFAULT,
-    ) : ApiClient(baseUrl, httpClientEngine, httpClientConfig, jsonBlock) {
+) : ApiClient(baseUrl, httpClientEngine, httpClientConfig, jsonBlock) {
 
-        /**
-        * 
-        * 
-         * @param source To specify source of request (optional)
-         * @return WorkBreak
-        */
-            @Suppress("UNCHECKED_CAST")
-        open suspend fun getOngoingBreak(source: kotlin.String?): HttpResponse<WorkBreak> {
+    /**
+     *
+     *
+     * @param source To specify source of request (optional)
+     * @return WorkBreak
+     */
+    @Suppress("UNCHECKED_CAST")
+    open suspend fun getOngoingBreak(source: kotlin.String?): HttpResponse<WorkBreak> {
 
-            val localVariableAuthNames = listOf<String>("api_token")
+        val localVariableAuthNames = listOf<String>("api_token")
 
-            val localVariableBody = 
-                    io.ktor.client.utils.EmptyContent
+        val localVariableBody =
+            io.ktor.client.utils.EmptyContent
 
-            val localVariableQuery = mutableMapOf<String, List<String>>()
-            source?.apply { localVariableQuery["source"] = listOf("$source") }
+        val localVariableQuery = mutableMapOf<String, List<String>>()
+        source?.apply { localVariableQuery["source"] = listOf("$source") }
 
-            val localVariableHeaders = mutableMapOf<String, String>()
+        val localVariableHeaders = mutableMapOf<String, String>()
 
-            val localVariableConfig = RequestConfig<kotlin.Any?>(
+        val localVariableConfig = RequestConfig<kotlin.Any?>(
             RequestMethod.GET,
             "/work-break/ongoing",
             query = localVariableQuery,
             headers = localVariableHeaders,
             requiresAuthentication = true,
-            )
+        )
 
-            return request(
+        return request(
             localVariableConfig,
             localVariableBody,
             localVariableAuthNames
-            ).wrap()
-            }
+        ).wrap()
+    }
 
-        /**
-        * 
-        * 
-         * @param source To specify source of request (optional)
-         * @return WorkBreak
-        */
-            @Suppress("UNCHECKED_CAST")
-        open suspend fun startWorkBreak(source: kotlin.String?): HttpResponse<WorkBreak> {
+    /**
+     *
+     *
+     * @param reason Reason for the break
+     * @param source To specify source of request (optional)
+     * @param workdayId  (optional)
+     * @return WorkBreak
+     */
+    @Suppress("UNCHECKED_CAST")
+    open suspend fun startWorkBreak(
+        reason: BreakReason,
+        source: kotlin.String?,
+        workdayId: kotlin.Int?
+    ): HttpResponse<WorkBreak> {
 
-            val localVariableAuthNames = listOf<String>("api_token")
+        val localVariableAuthNames = listOf<String>("api_token")
 
-            val localVariableBody = 
-                    io.ktor.client.utils.EmptyContent
+        val localVariableBody =
+            io.ktor.client.utils.EmptyContent
 
-            val localVariableQuery = mutableMapOf<String, List<String>>()
-            source?.apply { localVariableQuery["source"] = listOf("$source") }
+        val localVariableQuery = mutableMapOf<String, List<String>>()
+        source?.apply { localVariableQuery["source"] = listOf("$source") }
+        reason?.apply { localVariableQuery["reason"] = listOf(reason.name.lowercase()) }
+        workdayId?.apply { localVariableQuery["workdayId"] = listOf("$workdayId") }
 
-            val localVariableHeaders = mutableMapOf<String, String>()
+        val localVariableHeaders = mutableMapOf<String, String>()
 
-            val localVariableConfig = RequestConfig<kotlin.Any?>(
+        val localVariableConfig = RequestConfig<kotlin.Any?>(
             RequestMethod.POST,
             "/work-break/start",
             query = localVariableQuery,
             headers = localVariableHeaders,
             requiresAuthentication = true,
-            )
+        )
 
-            return request(
+        return request(
             localVariableConfig,
             localVariableBody,
             localVariableAuthNames
-            ).wrap()
-            }
+        ).wrap()
+    }
 
-        /**
-        * 
-        * 
-         * @param source To specify source of request (optional)
-         * @return EndedWorkBreak
-        */
-            @Suppress("UNCHECKED_CAST")
-        open suspend fun stopOngoingBeak(source: kotlin.String?): HttpResponse<EndedWorkBreak> {
+    /**
+     *
+     *
+     * @param source To specify source of request (optional)
+     * @return EndedWorkBreak
+     */
+    @Suppress("UNCHECKED_CAST")
+    open suspend fun stopOngoingBeak(source: kotlin.String?): HttpResponse<EndedWorkBreak> {
 
-            val localVariableAuthNames = listOf<String>("api_token")
+        val localVariableAuthNames = listOf<String>("api_token")
 
-            val localVariableBody = 
-                    io.ktor.client.utils.EmptyContent
+        val localVariableBody =
+            io.ktor.client.utils.EmptyContent
 
-            val localVariableQuery = mutableMapOf<String, List<String>>()
-            source?.apply { localVariableQuery["source"] = listOf("$source") }
+        val localVariableQuery = mutableMapOf<String, List<String>>()
+        source?.apply { localVariableQuery["source"] = listOf("$source") }
 
-            val localVariableHeaders = mutableMapOf<String, String>()
+        val localVariableHeaders = mutableMapOf<String, String>()
 
-            val localVariableConfig = RequestConfig<kotlin.Any?>(
+        val localVariableConfig = RequestConfig<kotlin.Any?>(
             RequestMethod.POST,
             "/work-break/stop",
             query = localVariableQuery,
             headers = localVariableHeaders,
             requiresAuthentication = true,
-            )
+        )
 
-            return request(
+        return request(
             localVariableConfig,
             localVariableBody,
             localVariableAuthNames
-            ).wrap()
-            }
+        ).wrap()
+    }
 
-        }
+}

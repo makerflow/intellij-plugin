@@ -1,8 +1,9 @@
 package co.makerflow.intellijplugin.status
 
-import co.makerflow.intellijplugin.state.Flow
 import co.makerflow.intellijplugin.state.FlowState
 import co.makerflow.intellijplugin.state.FlowStateChangeNotifier
+import co.makerflow.intellijplugin.state.WorkBreakState
+import co.makerflow.intellijplugin.state.WorkBreakStateChangeNotifier
 import com.intellij.openapi.actionSystem.ActionGroup
 import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.AnAction
@@ -24,7 +25,7 @@ import org.ocpsoft.prettytime.PrettyTime
 import java.awt.Component
 
 
-class FlowStatusBarWidget(project: @NotNull Project) : EditorBasedStatusBarPopup(project, false),
+class MakerflowStatusBarWidget(project: @NotNull Project) : EditorBasedStatusBarPopup(project, false),
     StatusBarWidget.TextPresentation {
 
     override fun getPresentation(): StatusBarWidget.WidgetPresentation {
@@ -37,12 +38,9 @@ class FlowStatusBarWidget(project: @NotNull Project) : EditorBasedStatusBarPopup
         return "MakerflowFlowStatusBarWidget"
     }
 
-    override fun createInstance(project: Project): StatusBarWidget = FlowStatusBarWidget(project)
+    override fun createInstance(project: Project): StatusBarWidget = MakerflowStatusBarWidget(project)
 
     override fun createPopup(context: DataContext): ListPopup? {
-        if (FlowState.instance.processing) {
-            return null
-        }
         val actions = mutableListOf<AnAction>()
         val actionManager = ActionManager.getInstance()
         actions.add(
@@ -50,23 +48,32 @@ class FlowStatusBarWidget(project: @NotNull Project) : EditorBasedStatusBarPopup
                 "co.makerflow.intellijplugin.actions.flowmode.ToggleFlowModeAction"
             )
         )
-        if (FlowState.instance.currentFlow == null) {
-            actions.add(
-                actionManager.getAction("co.makerflow.intellijplugin.actions.flowmode.TwentyFiveMinutesFlowModeAction")
-            )
-            actions.add(
-                actionManager.getAction("co.makerflow.intellijplugin.actions.flowmode.FiftyMinutesFlowModeAction")
-            )
-            actions.add(
-                actionManager.getAction("co.makerflow.intellijplugin.actions.flowmode.SeventyFiveMinutesFlowModeAction")
-            )
-        }
+        actions.add(
+            actionManager.getAction("co.makerflow.intellijplugin.actions.flowmode.TwentyFiveMinutesFlowModeAction")
+        )
+        actions.add(
+            actionManager.getAction("co.makerflow.intellijplugin.actions.flowmode.FiftyMinutesFlowModeAction")
+        )
+        actions.add(
+            actionManager.getAction("co.makerflow.intellijplugin.actions.flowmode.SeventyFiveMinutesFlowModeAction")
+        )
+        actions.add(
+            actionManager.getAction("co.makerflow.intellijplugin.actions.ToggleWorkBreakAction")
+        )
         val actionGroup: ActionGroup = object : ActionGroup() {
             override fun getChildren(e: AnActionEvent?): Array<AnAction> = actions.toTypedArray()
         }
-
+        val title = if (FlowState.instance.currentFlow == null) {
+            if (WorkBreakState.instance.currentBreak == null) {
+                "Start Flow Mode or Break"
+            } else {
+                "Stop Break"
+            }
+        } else {
+            "Stop Flow Mode"
+        }
         return JBPopupFactory.getInstance().createActionGroupPopup(
-            if (FlowState.instance.currentFlow == null) "Start Flow Mode" else "Stop Flow Mode",
+            title,
             actionGroup,
             context,
             JBPopupFactory.ActionSelectionAid.NUMBERING,
@@ -78,11 +85,17 @@ class FlowStatusBarWidget(project: @NotNull Project) : EditorBasedStatusBarPopup
         super.install(statusBar)
         myConnection.subscribe(
             FlowStateChangeNotifier.FLOW_STATE_CHANGE_TOPIC,
-            object : FlowStateChangeNotifier {
-                override fun updated(flow: Flow?, processing: Boolean) {
-                    UIUtil.invokeLaterIfNeeded {
-                        updateComponent(getWidgetState(null))
-                    }
+            FlowStateChangeNotifier { _, _ ->
+                UIUtil.invokeLaterIfNeeded {
+                    updateComponent(getWidgetState(null))
+                }
+            }
+        )
+        myConnection.subscribe(
+            WorkBreakStateChangeNotifier.WORK_BREAK_STATE_CHANGE_TOPIC,
+            WorkBreakStateChangeNotifier { _, _ ->
+                UIUtil.invokeLaterIfNeeded {
+                    updateComponent(getWidgetState(null))
                 }
             }
         )
@@ -90,23 +103,42 @@ class FlowStatusBarWidget(project: @NotNull Project) : EditorBasedStatusBarPopup
 
     override fun getTooltipText(): String {
         return when {
-            FlowState.instance.currentFlow == null && !FlowState.instance.processing -> {
-                "Flow Mode is not currently active. Click here to start a new Flow Mode session."
+            FlowState.isInFlow().not() && WorkBreakState.isOngoing().not() -> {
+                "You don't have Flow Mode or Break currently active. " +
+                        "Click here to start a new Flow Mode or Break session."
             }
 
-            FlowState.instance.currentFlow != null && !FlowState.instance.processing -> {
+            FlowState.isInFlow() -> {
                 val pair = getTimingInfo()
                 val startedFromNow = pair.first
                 val endingIn = pair.second
                 "Flow Mode started $startedFromNow$endingIn. Click here to stop the current Flow Mode session."
             }
 
-            FlowState.instance.currentFlow != null && FlowState.instance.processing -> {
+
+            FlowState.isStopping() -> {
                 "Stopping Flow Mode..."
             }
 
-            else -> {
+            FlowState.isStarting() -> {
                 "Starting Flow Mode..."
+            }
+
+            WorkBreakState.isOngoing() -> {
+                val startedFromNow = getBreakTimingInfo()
+                "Break started $startedFromNow. Click here to stop the current Break session."
+            }
+
+            WorkBreakState.isStarting() -> {
+                "Starting Break..."
+            }
+
+            WorkBreakState.isStopping() -> {
+                "Stopping Break..."
+            }
+
+            else -> {
+                "Makerflow"
             }
         }
     }
@@ -114,23 +146,40 @@ class FlowStatusBarWidget(project: @NotNull Project) : EditorBasedStatusBarPopup
 
     override fun getText(): String {
         return when {
-            FlowState.instance.currentFlow == null && !FlowState.instance.processing -> {
-                "Flow Mode: Stopped"
+            FlowState.isInFlow().not() && WorkBreakState.isOngoing().not() -> {
+                "Not in Flow Mode or on Break"
             }
 
-            FlowState.instance.currentFlow != null && !FlowState.instance.processing -> {
+            FlowState.isInFlow() -> {
                 val pair = getTimingInfo()
                 val startedFromNow = pair.first
                 val endingIn = pair.second
                 "Flow Mode Started: $startedFromNow$endingIn"
             }
 
-            FlowState.instance.currentFlow != null && FlowState.instance.processing -> {
+            FlowState.isStopping() -> {
                 "Flow Mode: Stopping"
             }
 
-            else -> {
+            FlowState.isStarting() -> {
                 "Flow Mode: Starting"
+            }
+
+            WorkBreakState.isOngoing() -> {
+                val startedFromNow = getBreakTimingInfo()
+                "On Break Since $startedFromNow."
+            }
+
+            WorkBreakState.isStarting() -> {
+                "Break: Starting"
+            }
+
+            WorkBreakState.isStopping() -> {
+                "Break: Stopping"
+            }
+
+            else -> {
+                "Makerflow"
             }
         }
     }
@@ -152,6 +201,14 @@ class FlowStatusBarWidget(project: @NotNull Project) : EditorBasedStatusBarPopup
             }"
         }
         return Pair(startedFromNow, endingIn)
+    }
+
+    private fun getBreakTimingInfo(): String {
+        val p = PrettyTime()
+        return p.format(
+            WorkBreakState.instance.currentBreak!!.start.toLocalDateTime(TimeZone.currentSystemDefault())
+                .toJavaLocalDateTime()
+        )
     }
 
     override fun getAlignment(): Float {

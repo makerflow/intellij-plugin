@@ -22,13 +22,14 @@
         <applicationService serviceImplementation="co.makerflow.intellijplugin.settings.SettingsState"/>
         <applicationService serviceImplementation="co.makerflow.intellijplugin.settings.CredentialAttributesProvider"/>
         <applicationService serviceImplementation="co.makerflow.intellijplugin.state.FlowState"/>
-        <statusBarWidgetFactory implementation="co.makerflow.intellijplugin.status.FlowStatusBarWidgetFactory"
+        <statusBarWidgetFactory implementation="co.makerflow.intellijplugin.status.MakerflowStatusBarWidgetFactory"
                                 id="co.makerflow.intellijplugin.FlowStatusBarWidgetFactory" />
         <toolWindow id="Unified Tasks List" anchor="bottom"
                     factoryClass="co.makerflow.intellijplugin.panels.TasksToolWindowFactory" />
         <toolWindow id="Calendar Events" anchor="right"
                     factoryClass="co.makerflow.intellijplugin.panels.CalendarEventsToolWindowFactory" />
         <postStartupActivity implementation="co.makerflow.intellijplugin.listeners.FlowModePostStartupActivity"/>
+        <postStartupActivity implementation="co.makerflow.intellijplugin.listeners.WorkBreakPostStartupActivity"/>
     </extensions>
 
     <actions>
@@ -51,6 +52,9 @@
         <action id="co.makerflow.intellijplugin.actions.tasks.AddCustomTaskAction"
                 class="co.makerflow.intellijplugin.actions.tasks.AddCustomTaskAction" text="Makerflow: Add Task"
                 description="Add a new task to the Makerflow task list"/>
+        <action id="co.makerflow.intellijplugin.actions.ToggleWorkBreakAction"
+                class="co.makerflow.intellijplugin.actions.ToggleWorkBreakAction" text="Begin Break"
+                description="Take a break from work"/>
     </actions>
 
 </idea-plugin>

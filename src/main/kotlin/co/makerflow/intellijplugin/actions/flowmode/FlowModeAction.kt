@@ -3,6 +3,7 @@ package co.makerflow.intellijplugin.actions.flowmode
 import co.makerflow.intellijplugin.services.FlowModeService
 import co.makerflow.intellijplugin.services.toFlow
 import co.makerflow.intellijplugin.state.FlowState
+import co.makerflow.intellijplugin.state.WorkBreakState
 import com.intellij.ide.actions.searcheverywhere.PossibleSlowContributor
 import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnAction
@@ -21,7 +22,7 @@ abstract class FlowModeAction(
     AnAction(text, description, null), PossibleSlowContributor {
     private val startFlowModeCoroutineScope = CoroutineScope(Dispatchers.IO)
     private val stopFlowModeCoroutineScope = CoroutineScope(Dispatchers.IO)
-    private fun stopFlowMode() {
+    fun stopFlowMode() {
         FlowState.instance.processing = true
         val flowModeService = service<FlowModeService>()
         ApplicationManager.getApplication().invokeLater {
@@ -59,7 +60,11 @@ abstract class FlowModeAction(
     override fun update(e: AnActionEvent) {
         val flowState = FlowState.instance
         if (duration != null) {
-            e.presentation.isEnabled = !flowState.processing && flowState.currentFlow == null
+            e.presentation.isEnabled = if (WorkBreakState.isOngoing()) {
+                false
+            } else {
+                !flowState.processing && flowState.currentFlow == null
+            }
         }
     }
 

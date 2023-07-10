@@ -16,20 +16,22 @@
 package co.makerflow.client.models
 
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 
 /**
  * Object representing a break from work
  *
- * @param id 
- * @param userId 
+ * @param id
+ * @param userId
  * @param start Timestamp for when the break was started
  * @param reason Reason for taking the break
  * @param end Timestamp for when the break was ended
  */
 
 
-data class WorkBreak (
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class WorkBreak(
 
     @field:JsonProperty("id")
     val id: kotlin.Int,

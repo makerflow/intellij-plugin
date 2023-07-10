@@ -21,6 +21,18 @@ class FlowState : PersistentStateComponent<FlowState> {
                 .syncPublisher(FlowStateChangeNotifier.FLOW_STATE_CHANGE_TOPIC).updated(value, processing)
         }
 
+    fun isStarting(): Boolean {
+        return currentFlow != null && !processing
+    }
+
+    fun isStopping(): Boolean {
+        return currentFlow == null && processing
+    }
+
+    fun isInFlow(): Boolean {
+        return currentFlow != null && !processing
+    }
+
     override fun getState(): FlowState {
         return instance
     }
@@ -30,6 +42,10 @@ class FlowState : PersistentStateComponent<FlowState> {
     }
 
     companion object {
+        fun isInFlow(): Boolean  = instance.isInFlow()
+        fun isStarting(): Boolean  = instance.isStarting()
+        fun isStopping(): Boolean  = instance.isStopping()
+
         private val state = FlowState()
         @JvmStatic
         val instance: FlowState

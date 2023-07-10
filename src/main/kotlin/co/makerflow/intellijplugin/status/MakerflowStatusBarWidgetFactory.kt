@@ -7,9 +7,9 @@ import com.intellij.openapi.wm.StatusBarWidget
 import com.intellij.openapi.wm.impl.status.widget.StatusBarEditorBasedWidgetFactory
 
 @Suppress("UnstableApiUsage")
-class FlowStatusBarWidgetFactory : StatusBarEditorBasedWidgetFactory(), LightEditCompatible {
+class MakerflowStatusBarWidgetFactory : StatusBarEditorBasedWidgetFactory(), LightEditCompatible {
 
-    private val id = "co.makerflow.intellijplugin.FlowStatusBarWidgetFactory"
+    private val id = "co.makerflow.intellijplugin.MakerflowStatusBarWidgetFactory"
     override fun getId(): String {
         return id
     }
@@ -20,7 +20,7 @@ class FlowStatusBarWidgetFactory : StatusBarEditorBasedWidgetFactory(), LightEdi
     }
 
     override fun createWidget(project: Project): StatusBarWidget {
-        return FlowStatusBarWidget(project)
+        return MakerflowStatusBarWidget(project)
     }
 
     override fun disposeWidget(widget: StatusBarWidget) {

@@ -1,8 +1,8 @@
 package co.makerflow.intellijplugin.actions.flowmode
 
-import co.makerflow.intellijplugin.state.Flow
 import co.makerflow.intellijplugin.state.FlowState
 import co.makerflow.intellijplugin.state.FlowStateChangeNotifier
+import co.makerflow.intellijplugin.state.WorkBreakStateChangeNotifier
 import com.intellij.ide.actions.searcheverywhere.PossibleSlowContributor
 import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.ActionUpdateThread
@@ -20,30 +20,29 @@ private const val STOP_FLOW_MODE_DESCRIPTION = "Stop the ongoing Flow Mode sessi
 class FlowModeActionGroup : DefaultActionGroup(), PossibleSlowContributor {
     init {
         UIUtil.invokeLaterIfNeeded {
-            if (FlowState.instance.currentFlow != null) {
-                updateTemplateForStoppingFlowMode()
-            } else {
-                updateTemplateForStartingFlowMode()
-            }
+            updateTemplates()
+            updateTimedFlowModeActions()
         }
         ApplicationManager.getApplication().messageBus.connect()
-            .subscribe(FlowStateChangeNotifier.FLOW_STATE_CHANGE_TOPIC, object : FlowStateChangeNotifier {
-                override fun updated(flow: Flow?, processing: Boolean) {
+            .subscribe(FlowStateChangeNotifier.FLOW_STATE_CHANGE_TOPIC,
+                FlowStateChangeNotifier { _, _ ->
                     UIUtil.invokeLaterIfNeeded {
-                        if (flow != null) {
-                            updateTemplateForStoppingFlowMode()
-                            updateTimedFlowModeActions()
-                        } else {
-                            updateTemplateForStartingFlowMode()
-                            updateTimedFlowModeActions()
-                        }
+                        updateTemplates()
+                        updateTimedFlowModeActions()
                     }
-                }
-            })
+                })
+        ApplicationManager.getApplication().messageBus.connect()
+            .subscribe(WorkBreakStateChangeNotifier.WORK_BREAK_STATE_CHANGE_TOPIC,
+                WorkBreakStateChangeNotifier { _, _ ->
+                    UIUtil.invokeLaterIfNeeded {
+                        updateTemplates()
+                        updateTimedFlowModeActions()
+                    }
+                })
     }
 
     override fun update(e: AnActionEvent) {
-        if (FlowState.instance.currentFlow != null) {
+        if (FlowState.isInFlow()) {
             e.presentation.text = STOP_FLOW_MODE_DIRECTIVE
             e.presentation.description = STOP_FLOW_MODE_DESCRIPTION
             e.presentation.isEnabled = false
@@ -58,16 +57,7 @@ class FlowModeActionGroup : DefaultActionGroup(), PossibleSlowContributor {
         return ActionUpdateThread.BGT
     }
 
-    private fun updateTemplateForStoppingFlowMode() {
-        update(buildActionEvent(this))
-        val toggleFlowModeAction = ActionManager.getInstance()
-            .getAction("co.makerflow.intellijplugin.actions.flowmode.ToggleFlowModeAction")
-        toggleFlowModeAction.update(
-            buildActionEvent(toggleFlowModeAction)
-        )
-    }
-
-    private fun updateTemplateForStartingFlowMode() {
+    private fun updateTemplates() {
         update(buildActionEvent(this))
         val toggleFlowModeAction = ActionManager.getInstance()
             .getAction("co.makerflow.intellijplugin.actions.flowmode.ToggleFlowModeAction")

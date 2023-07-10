@@ -22,6 +22,15 @@ class FlowModeService {
     private val baseUrl = System.getenv("MAKERFLOW_API_URL") ?: ApiClient.BASE_URL
     private val todoUtil = service<TodoUtil>()
 
+    private fun flowModeApi(): FlowModeApi {
+        val apiToken = getApiToken()
+        val api = FlowModeApi(baseUrl, null, null, ApiClient.JSON_DEFAULT)
+        api.setApiKey(apiToken)
+        return api
+    }
+
+    private fun getApiToken() = System.getenv("MAKERFLOW_API_TOKEN") ?: SettingsState.instance.apiToken
+
     suspend fun startFlowMode(): FlowMode? {
         return startFlowMode(null, null)
     }
@@ -54,15 +63,6 @@ class FlowModeService {
         }.join()
         return@coroutineScope flowMode
     }
-
-    private fun flowModeApi(): FlowModeApi {
-        val apiToken = getApiToken()
-        val api = FlowModeApi(baseUrl, null, null, ApiClient.JSON_DEFAULT)
-        api.setApiKey(apiToken)
-        return api
-    }
-
-    private fun getApiToken() = System.getenv("MAKERFLOW_API_TOKEN") ?: SettingsState.instance.apiToken
 
     suspend fun fetchOngoingFlowMode(): Pair<FlowMode?, TypedTodo?> = coroutineScope {
         var pair = Pair<FlowMode?, TypedTodo?>(null, null)

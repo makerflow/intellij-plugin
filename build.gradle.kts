@@ -81,7 +81,7 @@ idea {
 changelog {
     version.set(properties("pluginVersion"))
     path.set(file("CHANGELOG.md").canonicalPath)
-    header.set(provider { "[${version.get()}] - ${date()}" })
+    header.set(provider { "${version.get()}" })
     headerParserRegex.set("""(\d+\.\d+)""".toRegex())
     introduction.set(
         """

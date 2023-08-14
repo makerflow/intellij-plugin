@@ -2,7 +2,6 @@ package co.makerflow.intellijplugin.actions
 
 import co.makerflow.intellijplugin.dialogs.StartWorkBreakDialog
 import co.makerflow.intellijplugin.services.WorkBreakService
-import co.makerflow.intellijplugin.state.FlowState
 import co.makerflow.intellijplugin.state.WorkBreakState
 import co.makerflow.intellijplugin.state.WorkBreakStateChangeNotifier
 import com.intellij.icons.AllIcons

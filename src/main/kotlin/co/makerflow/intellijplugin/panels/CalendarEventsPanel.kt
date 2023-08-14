@@ -1,9 +1,11 @@
 package co.makerflow.intellijplugin.panels
 
 import co.makerflow.client.models.CalendarEvent
+import co.makerflow.intellijplugin.providers.ApiTokenProvider
 import co.makerflow.intellijplugin.services.EventsService
 import com.intellij.icons.AllIcons
 import com.intellij.ide.BrowserUtil
+import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.application.ApplicationManager
@@ -106,6 +108,11 @@ class UpcomingEventsPanel : SimpleToolWindowPanel(true) {
     }
 
     private fun loadEvents() {
+        val apiTokenPresent = service<ApiTokenProvider>().getApiToken().isNotEmpty()
+        if (apiTokenPresent.not()) {
+            showMissingApiTokenMessage()
+            return
+        }
         val service = service<EventsService>()
         fetchEventsCoroutineScope.launch {
             val events = service.fetchEvents()
@@ -140,6 +147,34 @@ class UpcomingEventsPanel : SimpleToolWindowPanel(true) {
                     border = JBUI.Borders.empty()
                 })
             }
+        }
+    }
+
+    private fun showMissingApiTokenMessage() {
+        ApplicationManager.getApplication().invokeLater {
+            val noTokenMessage = panel {
+                row {
+                    label("An API key for Makerflow is required to fetch events from your calendar.")
+                        .align(Align.CENTER)
+                }
+                row {
+                    button(
+                        "Set API Key",
+                        ActionManager.getInstance().getAction("co.makerflow.intellijplugin.actions.SetApiKeyAction")
+                    )
+                        .align(Align.CENTER)
+                }
+                row {
+                    comment("Click the button above to set your API key and for more information on how to get one.")
+                        .align(Align.CENTER)
+                }
+            }.apply {
+                border = JBUI.Borders.empty()
+                alignmentX = CENTER_ALIGNMENT
+            }
+            super.setContent(JBScrollPane(noTokenMessage).apply {
+                border = JBUI.Borders.emptyTop(CONTENT_TOP_OFFSET)
+            })
         }
     }
 

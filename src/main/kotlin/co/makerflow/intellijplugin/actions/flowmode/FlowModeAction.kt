@@ -20,13 +20,11 @@ abstract class FlowModeAction(
     private val duration: Int? = null
 ) :
     AnAction(text, description, null), PossibleSlowContributor {
-    private val startFlowModeCoroutineScope = CoroutineScope(Dispatchers.IO)
-    private val stopFlowModeCoroutineScope = CoroutineScope(Dispatchers.IO)
-    fun stopFlowMode() {
+    private fun stopFlowMode() {
         FlowState.instance.processing = true
         val flowModeService = service<FlowModeService>()
         ApplicationManager.getApplication().invokeLater {
-            stopFlowModeCoroutineScope.launch {
+            CoroutineScope(Dispatchers.IO).launch {
                 flowModeService.stopFlowMode()
                 FlowState.instance.currentFlow = null
             }.invokeOnCompletion {
@@ -39,7 +37,7 @@ abstract class FlowModeAction(
         FlowState.instance.processing = true
         val flowModeService = service<FlowModeService>()
         ApplicationManager.getApplication().invokeLater {
-            startFlowModeCoroutineScope.launch {
+            CoroutineScope(Dispatchers.IO).launch {
                 flowModeService.startFlowMode(null, duration)?.let { flowMode ->
                     FlowState.instance.currentFlow = flowMode.toFlow()
                 }

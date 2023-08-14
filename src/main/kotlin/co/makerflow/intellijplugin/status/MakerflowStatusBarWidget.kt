@@ -1,5 +1,6 @@
 package co.makerflow.intellijplugin.status
 
+import co.makerflow.intellijplugin.providers.ApiTokenProvider
 import co.makerflow.intellijplugin.state.FlowState
 import co.makerflow.intellijplugin.state.FlowStateChangeNotifier
 import co.makerflow.intellijplugin.state.WorkBreakState
@@ -9,6 +10,7 @@ import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.DataContext
+import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.openapi.ui.popup.ListPopup
@@ -43,23 +45,32 @@ class MakerflowStatusBarWidget(project: @NotNull Project) : EditorBasedStatusBar
     override fun createPopup(context: DataContext): ListPopup? {
         val actions = mutableListOf<AnAction>()
         val actionManager = ActionManager.getInstance()
-        actions.add(
-            actionManager.getAction(
-                "co.makerflow.intellijplugin.actions.flowmode.ToggleFlowModeAction"
+        val apiTokenPresent = service<ApiTokenProvider>().getApiToken().isEmpty().not()
+        if (apiTokenPresent) {
+            actions.add(
+                actionManager.getAction(
+                    "co.makerflow.intellijplugin.actions.flowmode.ToggleFlowModeAction"
+                )
             )
-        )
-        actions.add(
-            actionManager.getAction("co.makerflow.intellijplugin.actions.flowmode.TwentyFiveMinutesFlowModeAction")
-        )
-        actions.add(
-            actionManager.getAction("co.makerflow.intellijplugin.actions.flowmode.FiftyMinutesFlowModeAction")
-        )
-        actions.add(
-            actionManager.getAction("co.makerflow.intellijplugin.actions.flowmode.SeventyFiveMinutesFlowModeAction")
-        )
-        actions.add(
-            actionManager.getAction("co.makerflow.intellijplugin.actions.ToggleWorkBreakAction")
-        )
+            actions.add(
+                actionManager.getAction("co.makerflow.intellijplugin.actions.flowmode.TwentyFiveMinutesFlowModeAction")
+            )
+            actions.add(
+                actionManager.getAction("co.makerflow.intellijplugin.actions.flowmode.FiftyMinutesFlowModeAction")
+            )
+            actions.add(
+                actionManager.getAction("co.makerflow.intellijplugin.actions.flowmode.SeventyFiveMinutesFlowModeAction")
+            )
+            actions.add(
+                actionManager.getAction("co.makerflow.intellijplugin.actions.ToggleWorkBreakAction")
+            )
+        } else {
+            actions.add(
+                actionManager.getAction(
+                    "co.makerflow.intellijplugin.actions.SetApiKeyAction"
+                )
+            )
+        }
         val actionGroup: ActionGroup = object : ActionGroup() {
             override fun getChildren(e: AnActionEvent?): Array<AnAction> = actions.toTypedArray()
         }
@@ -147,7 +158,7 @@ class MakerflowStatusBarWidget(project: @NotNull Project) : EditorBasedStatusBar
     override fun getText(): String {
         return when {
             FlowState.isInFlow().not() && WorkBreakState.isOngoing().not() -> {
-                "Not in Flow Mode or on Break"
+                "Begin Flow Mode or Break"
             }
 
             FlowState.isInFlow() -> {

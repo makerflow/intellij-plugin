@@ -1,9 +1,15 @@
 package co.makerflow.intellijplugin.listeners
 
+import co.makerflow.intellijplugin.MyBundle
+import co.makerflow.intellijplugin.actions.DontShowFlowModeStartedNotificationAgain
+import co.makerflow.intellijplugin.actions.StopFlowModeNotificationAction
 import co.makerflow.intellijplugin.services.FlowModeService
 import co.makerflow.intellijplugin.services.HeartbeatService
 import co.makerflow.intellijplugin.services.toFlow
+import co.makerflow.intellijplugin.settings.SettingsState
 import co.makerflow.intellijplugin.state.FlowState
+import com.intellij.notification.NotificationGroupManager
+import com.intellij.notification.NotificationType
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.thisLogger
@@ -19,9 +25,21 @@ private const val DELAY_BETWEEN_FETCHES = 10L
 
 class FlowModePostStartupActivity : ProjectActivity {
 
-    // A new Job to fetch the ongoing flow mode
-    private val coroutineScope = CoroutineScope(Dispatchers.IO)
+    private val notificationGroup =
+        NotificationGroupManager.getInstance().getNotificationGroup("Makerflow")
 
+    private var flowModeStartedNotificationShown = false
+    private fun showFlowModeStartedNotification() = notificationGroup
+        .createNotification(
+            MyBundle.getMessage("makerflow.notification.flowMode.started.body"),
+            NotificationType.INFORMATION
+        )
+        .setTitle(MyBundle.getMessage("makerflow.notification.flowMode.started.title"))
+        .addAction(StopFlowModeNotificationAction())
+        .addAction(DontShowFlowModeStartedNotificationAgain())
+        .whenExpired {
+            flowModeStartedNotificationShown = false
+        }
 
     override suspend fun execute(project: Project) {
 
@@ -31,10 +49,22 @@ class FlowModePostStartupActivity : ProjectActivity {
         AppExecutorUtil.getAppScheduledExecutorService().scheduleWithFixedDelay({
             thisLogger().info("Fetching ongoing flow mode")
             ApplicationManager.getApplication().invokeLater {
-                coroutineScope.launch {
+                if (FlowState.isStarting() || FlowState.isStopping()) {
+                    return@invokeLater
+                }
+                CoroutineScope(Dispatchers.IO).launch {
                     val flowModeService = service<FlowModeService>()
                     val ongoingFlowMode = flowModeService.fetchOngoingFlowMode()
                     ongoingFlowMode.let { pair ->
+                        val flowModeStartedOutside = (!FlowState.isStarting()
+                                && pair.first != null
+                                && FlowState.instance.currentFlow == null)
+                        val showingNotificationWontBeAnnoying = !flowModeStartedNotificationShown
+                                && !SettingsState.instance.dontShowFlowModeStartedNotification
+                        if (flowModeStartedOutside && showingNotificationWontBeAnnoying) {
+                            showFlowModeStartedNotification().notify(project)
+                            flowModeStartedNotificationShown = true
+                        }
                         FlowState.instance.currentFlow = pair.first?.toFlow(pair.second)
                     }
                 }

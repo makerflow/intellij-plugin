@@ -1,36 +1,34 @@
 package co.makerflow.intellijplugin.services
 
 import co.makerflow.client.apis.EventsApi
-import co.makerflow.client.infrastructure.ApiClient
 import co.makerflow.client.models.CalendarEvent
-import co.makerflow.intellijplugin.settings.SettingsState
+import co.makerflow.intellijplugin.providers.ApiClientProvider
 import com.intellij.openapi.components.Service
+import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.project.DumbAware
 import com.squareup.moshi.JsonEncodingException
 import io.ktor.client.call.NoTransformationFoundException
+import io.ktor.client.network.sockets.ConnectTimeoutException
+import io.ktor.client.plugins.HttpRequestTimeoutException
 import io.ktor.serialization.JsonConvertException
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
 @Service
 class EventsService : DumbAware {
-    private val baseUrl = System.getenv("MAKERFLOW_API_URL") ?: ApiClient.BASE_URL
 
-    private fun eventsApi(): EventsApi {
-        val apiToken = getApiToken()
-        val api = EventsApi(baseUrl, null, null, ApiClient.JSON_DEFAULT)
-        api.setApiKey(apiToken)
-        return api
+    private fun eventsApi(): EventsApi? {
+        return service<ApiClientProvider>().provide(EventsApi::class.java)
     }
 
-    private fun getApiToken() = System.getenv("MAKERFLOW_API_TOKEN") ?: SettingsState.instance.apiToken
 
     suspend fun fetchEvents(): List<CalendarEvent> {
         return coroutineScope {
             var events: List<CalendarEvent>? = listOf()
+            val eventsApi = eventsApi() ?: return@coroutineScope events!!
             launch {
-                val response = eventsApi().upcomingCalendarEvents("jetbrains")
+                val response = eventsApi.upcomingCalendarEvents("jetbrains")
                 @Suppress("TooGenericExceptionCaught")
                 try {
                     if (response.success) {
@@ -39,6 +37,8 @@ class EventsService : DumbAware {
                 } catch (e: Exception) {
                     @Suppress("kotlin:S125")
                     when (e) {
+                        is HttpRequestTimeoutException,
+                        is ConnectTimeoutException,
                         is JsonConvertException,
                         is NoTransformationFoundException,
                         is JsonEncodingException -> {

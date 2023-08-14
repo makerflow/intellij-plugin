@@ -1,18 +1,18 @@
 package co.makerflow.intellijplugin.services
 
 import co.makerflow.client.apis.BreaksApi
-import co.makerflow.client.infrastructure.ApiClient
 import co.makerflow.client.models.BreakReason
 import co.makerflow.client.models.EndedWorkBreak
 import co.makerflow.client.models.WorkBreak
-import co.makerflow.intellijplugin.settings.SettingsState
-import co.makerflow.intellijplugin.state.Break
+import co.makerflow.intellijplugin.providers.ApiClientProvider
 import com.intellij.openapi.components.Service
+import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.project.DumbAware
-import com.intellij.util.messages.Topic
 import com.squareup.moshi.JsonEncodingException
 import io.ktor.client.call.NoTransformationFoundException
+import io.ktor.client.network.sockets.ConnectTimeoutException
+import io.ktor.client.plugins.HttpRequestTimeoutException
 import io.ktor.serialization.JsonConvertException
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
@@ -23,16 +23,11 @@ import kotlinx.coroutines.launch
  */
 @Service
 class WorkBreakService : DumbAware {
-    private val baseUrl = System.getenv("MAKERFLOW_API_URL") ?: ApiClient.BASE_URL
 
-    private fun api(): BreaksApi {
-        val apiToken = getApiToken()
-        val api = BreaksApi(baseUrl, null, null, ApiClient.JSON_DEFAULT)
-        api.setApiKey(apiToken)
-        return api
+    private fun api(): BreaksApi? {
+        return service<ApiClientProvider>().provide(BreaksApi::class.java)
     }
 
-    private fun getApiToken() = System.getenv("MAKERFLOW_API_TOKEN") ?: SettingsState.instance.apiToken
 
     /**
      * Starts a work break.
@@ -40,8 +35,8 @@ class WorkBreakService : DumbAware {
     suspend fun startWorkBreak(reason: BreakReason): WorkBreak? {
         return coroutineScope {
             var workBreak: WorkBreak? = null
+            val breaksApi = api() ?: return@coroutineScope workBreak
             launch {
-                val breaksApi = api()
                 @Suppress("TooGenericExceptionCaught")
                 try {
                     val startWorkBreakResponse = breaksApi.startWorkBreak(reason, "jetbrains", null)
@@ -51,6 +46,8 @@ class WorkBreakService : DumbAware {
                 } catch (e: Exception) {
                     @Suppress("kotlin:S125")
                     when (e) {
+                        is HttpRequestTimeoutException,
+                        is ConnectTimeoutException,
                         is JsonConvertException,
                         is NoTransformationFoundException,
                         is JsonEncodingException -> {
@@ -78,8 +75,8 @@ class WorkBreakService : DumbAware {
     suspend fun stopWorkBreak(): EndedWorkBreak? {
         return coroutineScope {
             var workBreak: EndedWorkBreak? = null
+            val breaksApi = api() ?: return@coroutineScope workBreak
             launch {
-                val breaksApi = api()
                 @Suppress("TooGenericExceptionCaught")
                 try {
                     val stopWorkBreakResponse = breaksApi.stopOngoingBeak("jetbrains")
@@ -89,6 +86,8 @@ class WorkBreakService : DumbAware {
                 } catch (e: Exception) {
                     @Suppress("kotlin:S125")
                     when (e) {
+                        is HttpRequestTimeoutException,
+                        is ConnectTimeoutException,
                         is JsonConvertException,
                         is NoTransformationFoundException,
                         is JsonEncodingException -> {
@@ -116,8 +115,8 @@ class WorkBreakService : DumbAware {
     suspend fun getOngoingWorkBreak(): WorkBreak? {
         return coroutineScope {
             var workBreak: WorkBreak? = null
+            val breaksApi = api() ?: return@coroutineScope workBreak
             launch {
-                val breaksApi = api()
                 @Suppress("TooGenericExceptionCaught")
                 try {
                     val ongoingWorkBreakResponse = breaksApi.getOngoingBreak("jetbrains")
@@ -127,6 +126,8 @@ class WorkBreakService : DumbAware {
                 } catch (e: Exception) {
                     @Suppress("kotlin:S125")
                     when (e) {
+                        is HttpRequestTimeoutException,
+                        is ConnectTimeoutException,
                         is JsonConvertException,
                         is NoTransformationFoundException,
                         is JsonEncodingException -> {

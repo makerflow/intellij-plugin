@@ -8,11 +8,12 @@
     <!-- https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->
     <depends>com.intellij.modules.platform</depends>
 
+    <resource-bundle>messages.MyBundle</resource-bundle>
+
     <extensions defaultExtensionNs="com.intellij">
         <applicationConfigurable parentId="tools" instance="co.makerflow.intellijplugin.settings.SettingsConfigurable"
                                  id="co.makerflow.intellijplugin.settings.SettingsConfigurable"
                                  displayName="Makerflow"/>
-        <applicationService serviceImplementation="co.makerflow.intellijplugin.services.HeartbeatService"/>
         <editorFactoryDocumentListener
                 implementation="co.makerflow.intellijplugin.listeners.MyDocumentListener"/>
         <editorFactoryMouseListener
@@ -20,7 +21,6 @@
         <fileDocumentManagerListener implementation="co.makerflow.intellijplugin.listeners.MyFileDocumentManagerListener"/>
         <editorFactoryListener implementation="co.makerflow.intellijplugin.listeners.MyEditorFactoryListener"/>
         <applicationService serviceImplementation="co.makerflow.intellijplugin.settings.SettingsState"/>
-        <applicationService serviceImplementation="co.makerflow.intellijplugin.settings.CredentialAttributesProvider"/>
         <applicationService serviceImplementation="co.makerflow.intellijplugin.state.FlowState"/>
         <statusBarWidgetFactory implementation="co.makerflow.intellijplugin.status.MakerflowStatusBarWidgetFactory"
                                 id="co.makerflow.intellijplugin.FlowStatusBarWidgetFactory" />
@@ -30,6 +30,7 @@
                     factoryClass="co.makerflow.intellijplugin.panels.CalendarEventsToolWindowFactory" />
         <postStartupActivity implementation="co.makerflow.intellijplugin.listeners.FlowModePostStartupActivity"/>
         <postStartupActivity implementation="co.makerflow.intellijplugin.listeners.WorkBreakPostStartupActivity"/>
+        <notificationGroup id="Makerflow" displayType="BALLOON" key="makerflow.notification.group.name" />
     </extensions>
 
     <actions>
@@ -55,6 +56,9 @@
         <action id="co.makerflow.intellijplugin.actions.ToggleWorkBreakAction"
                 class="co.makerflow.intellijplugin.actions.ToggleWorkBreakAction" text="Begin Break"
                 description="Take a break from work"/>
+        <action id="co.makerflow.intellijplugin.actions.SetApiKeyAction"
+                class="co.makerflow.intellijplugin.actions.SetApiKeyAction" text="Set API Token"
+                description="Set the API token for Makerflow"/>
     </actions>
 
 </idea-plugin>

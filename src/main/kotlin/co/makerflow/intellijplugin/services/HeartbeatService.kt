@@ -23,14 +23,21 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
+import java.util.concurrent.atomic.AtomicBoolean
 
 @Service
 class HeartbeatService {
 
     private val activityTimestamps = mutableSetOf<Long>()
+    private var lastSendTimestamp = 0L
+    private val activityTimestampsQueue = mutableSetOf<Long>() // see heartbeat() for more
+
+    // Flags to prevent multiple concurrent requests or modifications to activityTimestamps
+    private val sending = AtomicBoolean()
+    private val pruningTimestamps = AtomicBoolean()
+
     private val notificationGroup =
         NotificationGroupManager.getInstance().getNotificationGroup("Makerflow")
-
     private var apiKeyNotificationShown = 0
     private fun promptForApiTokenNotification() = notificationGroup
         .createNotification(
@@ -45,28 +52,56 @@ class HeartbeatService {
         }
 
     fun heartbeat() {
-        activityTimestamps.add(System.currentTimeMillis())
+        val now = System.currentTimeMillis()
+        if (sending.get() || pruningTimestamps.get()) {
+            // If we're currently sending timestamps to the backend, then let's avoid modifying
+            // activityTimestamps to prevent concurrent modification exceptions
+            // Instead we maintain a shadow set of timestamps that we'll merge into activityTimestamps
+            // once the request is complete
+            // I couldn't a find a way to use a thread-safe set that would allow us to sort and clear it in different
+            // threads, so we're using a regular mutable set with these workarounds to emulate a thread-safe set
+            activityTimestampsQueue.add(now)
+            return
+        }
+        if (activityTimestampsQueue.isNotEmpty()) {
+            activityTimestamps.addAll(activityTimestampsQueue)
+            activityTimestampsQueue.clear()
+        }
+        activityTimestamps.add(now)
     }
 
     init {
         AppExecutorUtil.getAppScheduledExecutorService().scheduleWithFixedDelay({
-            if (activityTimestamps.size >= 2) {
+            if (sending.get() || activityTimestamps.size < 2) {
+                return@scheduleWithFixedDelay
+            }
 
-                val apiToken = getApiToken()
-                if (apiToken.isEmpty() && !SettingsState.instance.dontShowApiTokenPrompt) {
-                    if (apiKeyNotificationShown == 0) {
-                        ProjectManager.getInstance().openProjects.forEach { promptForApiTokenNotification().notify(it) }
-                        apiKeyNotificationShown++
-                    }
-                } else if (apiToken.isNotEmpty()) {
-                    UIUtil.invokeLaterIfNeeded {
-                        CoroutineScope(Dispatchers.IO).launch {
+            pruneTimestamps()
+
+            // Send timestamps to backend
+            val apiToken = getApiToken()
+            if (apiToken.isEmpty() && !SettingsState.instance.dontShowApiTokenPrompt) {
+                if (apiKeyNotificationShown == 0) {
+                    ProjectManager.getInstance().openProjects.forEach { promptForApiTokenNotification().notify(it) }
+                    apiKeyNotificationShown++
+                }
+            } else if (apiToken.isNotEmpty()) {
+                UIUtil.invokeLaterIfNeeded {
+                    CoroutineScope(Dispatchers.IO).launch {
+                        if (!sending.get()) {
                             send(apiToken)
                         }
                     }
                 }
             }
         }, INTERVAL, INTERVAL, java.util.concurrent.TimeUnit.MILLISECONDS)
+    }
+
+    private fun pruneTimestamps() {
+        // Clear timestamps older than lastSendTimestamp
+        pruningTimestamps.set(true)
+        activityTimestamps.removeIf { it < lastSendTimestamp }
+        pruningTimestamps.set(false)
     }
 
     private fun getApiToken(): String {
@@ -76,22 +111,19 @@ class HeartbeatService {
     private suspend fun send(
         apiToken: String
     ) {
-        val list = activityTimestamps.toMutableList()
-        activityTimestamps.clear()
-        list.sort()
+        sending.set(true)
         val api = service<ApiClientProvider>().provide(ProductiveActivityApi::class.java) ?: return
         api.setApiKey(apiToken)
+        val sortedTimestamps = activityTimestamps.sorted()
         return coroutineScope {
             @Suppress("TooGenericExceptionCaught")
             launch {
                 try {
-                    val logProductiveActivity =
-                        api.logProductiveActivity(list, "jetbrains")
-                    if (!logProductiveActivity.success) {
-                        activityTimestamps.addAll(list)
+                    val req = api.logProductiveActivity(sortedTimestamps, "jetbrains")
+                    if (req.success) {
+                        lastSendTimestamp = System.currentTimeMillis()
                     }
                 } catch (e: Exception) {
-                    activityTimestamps.addAll(list)
                     @Suppress("kotlin:S125")
                     when (e) {
                         is HttpRequestTimeoutException,
@@ -106,8 +138,13 @@ class HeartbeatService {
                            */
                         }
 
-                        else -> throw e
+                        else -> {
+                            sending.set(false)
+                            throw e
+                        }
                     }
+                } finally {
+                    sending.set(false)
                 }
             }
         }.join()

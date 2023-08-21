@@ -28,7 +28,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 @Service
 class HeartbeatService {
 
-    private val activityTimestamps = mutableSetOf<Long>()
+    private val activityTimestamps = sortedSetOf<Long>()
     private var lastSendTimestamp = 0L
     private val activityTimestampsQueue = mutableSetOf<Long>() // see heartbeat() for more
 
@@ -89,7 +89,7 @@ class HeartbeatService {
                 UIUtil.invokeLaterIfNeeded {
                     CoroutineScope(Dispatchers.IO).launch {
                         if (!sending.get()) {
-                            send(apiToken)
+                            send()
                         }
                     }
                 }
@@ -108,13 +108,10 @@ class HeartbeatService {
         return service<ApiTokenProvider>().getApiToken()
     }
 
-    private suspend fun send(
-        apiToken: String
-    ) {
+    private suspend fun send() {
         sending.set(true)
         val api = service<ApiClientProvider>().provide(ProductiveActivityApi::class.java) ?: return
-        api.setApiKey(apiToken)
-        val sortedTimestamps = activityTimestamps.sorted()
+        val sortedTimestamps = activityTimestamps.toList()
         return coroutineScope {
             @Suppress("TooGenericExceptionCaught")
             launch {

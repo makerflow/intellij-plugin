@@ -72,7 +72,7 @@ class HeartbeatService {
 
     init {
         AppExecutorUtil.getAppScheduledExecutorService().scheduleWithFixedDelay({
-            if (sending.get() || activityTimestamps.size < 2) {
+            if (sending.get() || pruningTimestamps.get() || activityTimestamps.size < 2) {
                 return@scheduleWithFixedDelay
             }
 
@@ -88,7 +88,7 @@ class HeartbeatService {
             } else if (apiToken.isNotEmpty()) {
                 UIUtil.invokeLaterIfNeeded {
                     CoroutineScope(Dispatchers.IO).launch {
-                        if (!sending.get()) {
+                        if (!sending.get() && !pruningTimestamps.get()) {
                             send()
                         }
                     }
@@ -109,9 +109,35 @@ class HeartbeatService {
     }
 
     private suspend fun send() {
+        if (activityTimestamps.size < 2 || pruningTimestamps.get() || sending.get()) {
+            return
+        }
         sending.set(true)
         val api = service<ApiClientProvider>().provide(ProductiveActivityApi::class.java) ?: return
-        val sortedTimestamps = activityTimestamps.toList()
+        // Usually we could have just created a copy of activityTimestamps with a call to toList()
+        // But, we are working with a set that might be concurrently accessed by other threads
+        // So we need to make sure that every element in the set exists before accessing it.
+        // In some early testing I found that toList() was causing a NoSuchElementException
+        val sortedTimestamps = when (activityTimestamps.size) {
+            // This implementation is a mix of logic from CollectionsKt.toList() and
+            // a comment in https://youtrack.jetbrains.com/issue/KT-30185
+            // We short-circuit the send method earlier when activityTimestamps.size < 2,
+            // so the size == 0 and size == 1 cases should not execute,
+            // but I am covering those case here for completeness
+            0 -> emptyList()
+            1 -> {
+                val iter = activityTimestamps.iterator()
+                if(iter.hasNext()) listOf(iter.next()) else emptyList()
+            }
+            else -> {
+                val iter = activityTimestamps.iterator()
+                val temp = mutableListOf<Long>()
+                while (iter.hasNext()) {
+                    temp.add(iter.next())
+                }
+                temp.sorted()
+            }
+        }
         return coroutineScope {
             @Suppress("TooGenericExceptionCaught")
             launch {
